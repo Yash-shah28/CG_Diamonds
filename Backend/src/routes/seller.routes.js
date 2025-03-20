@@ -1,7 +1,7 @@
 import express from 'express'
 import { body } from 'express-validator';
 const router = express.Router();
-import { loginSeller, registerSeller } from "../controllers/seller.controllers.js";
+import { loginSeller, registerSeller, checkSellerSession, logoutSeller, verifyToken } from "../controllers/seller.controllers.js";
 
 
 router.post('/login', [
@@ -23,8 +23,10 @@ router.post('/register',[
     .withMessage("Phone number must be 10 digits long")
 ] ,registerSeller);
 
+// Protected routes
 
-// router.get('/logout');
+router.post('/logout', checkSellerSession, logoutSeller);
 
+router.get('/verify-token', verifyToken);
 
 export default router;

@@ -7,8 +7,7 @@ import axios from 'axios';
 export const SellerContext = createContext();
 
 const SellerContextProvider = ({children}) => {
-
-    let [seller, setSeller] = useState({
+    const [seller, setSeller] = useState({
         email: '',
         fullname: {
             firstname: '',
@@ -17,42 +16,94 @@ const SellerContextProvider = ({children}) => {
         pnumber: '',
         isAuthenticated: false
     });
-
     const [loading, setLoading] = useState(true);
+    const [retryCount, setRetryCount] = useState(0);
+    const MAX_RETRIES = 3;
 
-    // Check for existing token on mount
+    // Check for existing token on mount and verify it
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            verifyToken(token);
-        } else {
-            setLoading(false);
-        }
-    }, []);
-
-    const verifyToken = async (token) => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_BASEURL}/sellers/verify`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response.status === 201) {
-                setSeller({
-                    ...response.data.user,
-                    isAuthenticated: true
-                });
+        const verifyAuth = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setLoading(false);
+                return;
             }
-        } catch (error) {
-            localStorage.removeItem('token');
-            setSeller({
-                email: '',
-                fullname: { firstname: '', lastname: '' },
-                pnumber: '',
-                isAuthenticated: false
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+
+            try {
+                const response = await axios.get(
+                    `${import.meta.env.VITE_BASEURL}/sellers/verify-token`, 
+                    {
+                        headers: { 
+                            Authorization: `Bearer ${token}`,
+                            'Cache-Control': 'no-cache'
+                        }
+                    }
+                );
+
+                if (response.status === 200) {
+                    setSeller({
+                        ...response.data.seller,
+                        isAuthenticated: true
+                    });
+                    setRetryCount(0); // Reset retry count on success
+                }
+            } catch (error) {
+                console.error('Token verification error:', error);
+                
+                if (error.response?.status === 401 && retryCount < MAX_RETRIES) {
+                    // Retry verification
+                    setRetryCount(prev => prev + 1);
+                    return;
+                }
+
+                // Clear authentication if max retries reached or other error
+                localStorage.removeItem('token');
+                setSeller({
+                    email: '',
+                    fullname: { firstname: '', lastname: '' },
+                    pnumber: '',
+                    isAuthenticated: false
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        verifyAuth();
+    }, [retryCount]); // Add retryCount as dependency
+
+    // Add axios interceptor with retry logic
+    useEffect(() => {
+        const interceptor = axios.interceptors.request.use(
+            config => {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                    // Add cache control to prevent caching
+                    config.headers['Cache-Control'] = 'no-cache';
+                }
+                return config;
+            },
+            error => Promise.reject(error)
+        );
+
+        // Add response interceptor to handle token expiration
+        const responseInterceptor = axios.interceptors.response.use(
+            response => response,
+            async (error) => {
+                if (error.response?.status === 401 && retryCount < MAX_RETRIES) {
+                    setRetryCount(prev => prev + 1);
+                    return axios.request(error.config);
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            axios.interceptors.request.eject(interceptor);
+            axios.interceptors.response.eject(responseInterceptor);
+        };
+    }, [retryCount]);
 
     const login = async (userData) => {
         try {
@@ -72,36 +123,39 @@ const SellerContextProvider = ({children}) => {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setSeller({
-            email: '',
-            fullname: { firstname: '', lastname: '' },
-            pnumber: '',
-            isAuthenticated: false
-        });
+    const logout = async () => {
+        try {
+            await axios.post(`${import.meta.env.VITE_BASEURL}/sellers/logout`);
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            localStorage.removeItem('token');
+            setSeller({
+                email: '',
+                fullname: { firstname: '', lastname: '' },
+                pnumber: '',
+                isAuthenticated: false
+            });
+        }
     };
 
-    // First, add the signup method to userContext.jsx
-// Add this before the return statement
-
-const signup = async (userData) => {
-    try {
-        const response = await axios.post(
-            `${import.meta.env.VITE_BASEURL}/sellers/register`,
-            userData
-        );
-        if (response.status === 201) {
-            const { user: userData } = response.data;
-            setSeller({ ...userData });
-            return true;
+    const signup = async (userData) => {
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_BASEURL}/sellers/register`,
+                userData
+            );
+            if (response.status === 201) {
+                const { user: userData } = response.data;
+                setSeller({ ...userData });
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.log(error.response.data)
+            throw new Error(error.response.data.errors|| error.response?.data?.message || 'Signup failed');
         }
-        return false;
-    } catch (error) {
-        console.log(error.response.data)
-        throw new Error(error.response.data.errors|| error.response?.data?.message || 'Signup failed');
-    }
-};
+    };
 
     return (
         <SellerContext.Provider value={{

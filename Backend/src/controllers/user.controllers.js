@@ -29,29 +29,53 @@ export const registerUser = async(req,res,next) =>{
     res.status(201).json({user})
 }
 
-export const loginUser = async(req,res,next) => {
-
-    const errors = validationResult(req);
+export const loginUser = async(req, res, next) => {
+    try {
+        const errors = validationResult(req);
         if(!errors.isEmpty()){
             return res.status(400).json({ errors: errors.array() });
         }
 
-    const { email, password } = req.body;
+        const { email, password } = req.body;
+        const user = await userModel.findOne({ email }).select('+password');
 
-    const user = await userModel.findOne({ email }).select('+password');
+        if(!user){
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-    if(!user){
-        return res.status(401).json({ message: 'Invalid email or password' });
-    }
-    console.log(user)
+        const isMatch = await bcrypt.compare(password, user.password);
 
-    const isMatch =await bcrypt.compare(password, user.password)
+        if(!isMatch){
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-    if(!isMatch){
-        return res.status(401).json({ message: 'Invalid email or password' });
-    }
-        const token = jwt.sign({ userId: user._id },process.env.JWT_SECRET,{ expiresIn: '24h' });
+        // Create session
+        req.session.user = {
+            id: user._id,
+            email: user.email,
+            fullname: user.fullname
+        };
+            
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
         user.token = token;
         await user.save();
-        return res.status(201).json({token: token});
+        
+        return res.status(201).json({
+            token: token,
+            user: {
+                email: user.email,
+                fullname: user.fullname
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
 }
+
+// Add session check middleware
+export const checkUserSession = (req, res, next) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: 'Unauthorized - Please login' });
+    }
+    next();
+};

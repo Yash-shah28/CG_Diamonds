@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import React from 'react';
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import React, { useContext } from 'react';
+import { Box, Typography, Grid, Card, CardContent, CircularProgress } from '@mui/material';
 import Layout from '../components/admin/SellerLayout';
 import { Line } from 'react-chartjs-2';
 import {
@@ -13,11 +13,22 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { SellerContext } from '../context/SellerContext';
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
+  const { loading } = useContext(SellerContext);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   // Sample data for the graph
   const data = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June'],

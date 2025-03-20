@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
-import { Box, Typography, Card, CardContent, Snackbar, Alert } from '@mui/material';
+import React, { useState, useContext } from 'react';
+import { Box, Typography, Card, CardContent, Snackbar, Alert, CircularProgress } from '@mui/material';
 import SellerLayout from '../components/admin/SellerLayout';
+import { DiamondContext } from '../context/DiamondContext';
 
 export default function UploadStocks() {
   const [file, setFile] = useState(null);
@@ -9,6 +10,8 @@ export default function UploadStocks() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  
+  const { uploadDiamonds, loading } = useContext(DiamondContext);
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -31,7 +34,7 @@ export default function UploadStocks() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
       setError('Please select a CSV file to upload.');
@@ -41,11 +44,24 @@ export default function UploadStocks() {
       return;
     }
 
-    // Simulate file upload
-    setSnackbarMessage('File uploaded successfully!');
-    setSnackbarSeverity('success');
-    setOpenSnackbar(true);
-    setFile(null);
+    try {
+      const result = await uploadDiamonds(file);
+      if (result.success) {
+        setSnackbarMessage(`${result.message} (${result.count} records processed)`);
+        setSnackbarSeverity('success');
+      } else {
+        setSnackbarMessage(result.message);
+        setSnackbarSeverity('error');
+      }
+    } catch (error) {
+      setSnackbarMessage(error.message);
+      setSnackbarSeverity('error');
+    } finally {
+      setOpenSnackbar(true);
+      setFile(null);
+      // Reset file input
+      e.target.reset();
+    }
   };
 
   return (
@@ -73,13 +89,22 @@ export default function UploadStocks() {
                   accept=".csv"
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#111]"
                   onChange={handleFileChange}
+                  disabled={loading}
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-black text-white py-2 rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+                disabled={loading}
+                className="w-full bg-black text-white py-2 rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center"
               >
-                Upload
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} color="inherit" className="mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  'Upload'
+                )}
               </button>
             </form>
           </CardContent>
