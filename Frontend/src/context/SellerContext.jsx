@@ -4,16 +4,17 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from 'axios';
 
-export const UserContext = createContext();
+export const SellerContext = createContext();
 
-const UserContextProvider = ({children}) => {
+const SellerContextProvider = ({children}) => {
 
-    const [user, setUser] = useState({
+    let [seller, setSeller] = useState({
         email: '',
         fullname: {
             firstname: '',
             lastname: ''
         },
+        pnumber: '',
         isAuthenticated: false
     });
 
@@ -31,20 +32,21 @@ const UserContextProvider = ({children}) => {
 
     const verifyToken = async (token) => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASEURL}/users/verify`, {
+            const response = await axios.get(`${import.meta.env.VITE_BASEURL}/sellers/verify`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status === 201) {
-                setUser({
+                setSeller({
                     ...response.data.user,
                     isAuthenticated: true
                 });
             }
         } catch (error) {
             localStorage.removeItem('token');
-            setUser({
+            setSeller({
                 email: '',
                 fullname: { firstname: '', lastname: '' },
+                pnumber: '',
                 isAuthenticated: false
             });
         } finally {
@@ -55,28 +57,27 @@ const UserContextProvider = ({children}) => {
     const login = async (userData) => {
         try {
             const response = await axios.post(
-                `${import.meta.env.VITE_BASEURL}/users/login`,
+                `${import.meta.env.VITE_BASEURL}/sellers/login`,
                 userData
             );
-            console.log(response)
             if (response.status === 201) {
-                console.log(response.data)
                 const { user: userData, token } = response.data;
-                setUser({ ...userData, isAuthenticated: true });
+                setSeller({ ...userData, isAuthenticated: true });
                 localStorage.setItem('token', token);
                 return true;
             }
             return false;
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Login failed');
+            throw new Error(error.response.data.errors||error.response?.data?.message || 'Login failed');
         }
     };
 
     const logout = () => {
         localStorage.removeItem('token');
-        setUser({
+        setSeller({
             email: '',
             fullname: { firstname: '', lastname: '' },
+            pnumber: '',
             isAuthenticated: false
         });
     };
@@ -87,32 +88,33 @@ const UserContextProvider = ({children}) => {
 const signup = async (userData) => {
     try {
         const response = await axios.post(
-            `${import.meta.env.VITE_BASEURL}/users/register`,
+            `${import.meta.env.VITE_BASEURL}/sellers/register`,
             userData
         );
         if (response.status === 201) {
             const { user: userData } = response.data;
-            setUser({ ...userData });
+            setSeller({ ...userData });
             return true;
         }
         return false;
     } catch (error) {
+        console.log(error.response.data)
         throw new Error(error.response.data.errors|| error.response?.data?.message || 'Signup failed');
     }
 };
 
     return (
-        <UserContext.Provider value={{
-            user,
-            setUser,
+        <SellerContext.Provider value={{
+            seller,
+            setSeller,
             login,
             logout,
             signup,
             loading
         }}>
             {children}
-        </UserContext.Provider>
+        </SellerContext.Provider>
     );
 };
 
-export default UserContextProvider;
+export default SellerContextProvider

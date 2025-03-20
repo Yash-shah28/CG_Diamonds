@@ -1,9 +1,9 @@
-import DiamondShape from "../components/DiamondShape";
-import FeaturedDiamonds from "../components/FeaturedDiamonds";
-import Footer from "../components/Footer";
-import Hero from "../components/Hero";
-import Navbar from "../components/Navbar";
-import WhyChooseUs from "../components/WhyChooseUs";
+import DiamondShape from "../components/client/DiamondShape";
+import FeaturedDiamonds from "../components/client/FeaturedDiamonds";
+import Footer from "../components/client/Footer";
+import Hero from "../components/client/Hero";
+import Navbar from "../components/client/Navbar";
+import WhyChooseUs from "../components/client/WhyChooseUs";
 
 
 export default function Home() {    

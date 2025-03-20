@@ -1,23 +1,61 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
-import Navbar from "../components/Navbar";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import Navbar from "../components/client/Navbar";
+import { Link, useNavigate } from "react-router-dom";
+import { SellerContext } from '../context/SellerContext'
+import { Snackbar, Alert } from '@mui/material';
+import Slide from '@mui/material/Slide';
+
 
 export default function SellerLogin(){
     let [email, setEmail] = useState("");
     let [password, setPassword] = useState("");
-    let [sellerData,setSellerData]  = useState({})
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
+    function SlideTransition(props) {
+        return <Slide {...props} direction="right" />;
+      }
 
-    const handleSubmit = (e) => {
+    const { login } = useContext(SellerContext);
+    const navigate = useNavigate()
+
+    const handleCloseSnackbar = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenSnackbar(false);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSellerData({
-            email:email,
-            password:password
-        })
-        console.log(sellerData);
-        setEmail("");
-        setPassword("");
+       
+        setError("");
+        setLoading(true);
+
+        try {
+            const success = await login({ email, password });
+            if (success) {
+                setSnackbarMessage('Login successful! Redirecting...');
+                setSnackbarSeverity('success');
+                setOpenSnackbar(true);
+                setTimeout(() => {
+                    navigate('/seller-dashboard');
+                }, 1000);
+            }
+        } catch (err) {
+            setError(err.message);
+            setSnackbarMessage(err.message);
+            setSnackbarSeverity('error');
+            setOpenSnackbar(true);
+        } finally {
+            setLoading(false);
+            setEmail("");
+            setPassword("");
+        }
     };
 
     return(
@@ -25,7 +63,10 @@ export default function SellerLogin(){
             <Navbar/>
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-6 rounded-lg shadow-lg w-125">
-                <h2 className="text-2xl font-semibold text-center mb-4">Welcome back to CG Diamond</h2>
+                <h2 className="text-2xl font-semibold text-center mb-4">Seller Login</h2>
+                <p className="text-gray-600 text-center mb-8 text-lg">
+                        Access your seller dashboard
+                    </p>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block mb-2 text-gray-700 font-medium" htmlFor="email">Your email address</label>
@@ -49,19 +90,34 @@ export default function SellerLogin(){
                         required
                         />
                     </div>
-                    {/* <div className="text-right mb-4">
-                        <a href="#" className="text-sm text-blue-600 hover:underline">Forgot password?</a>
-                    </div> */}
                     <button
-                    type="submit"
-                    className="w-full bg-black text-white py-2 rounded-lg hover:opacity-90">Log In
-                    </button>
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-black text-white py-2 rounded-lg hover:opacity-90 disabled:opacity-50"
+                        >
+                            {loading ? 'Logging in...' : 'Log In'}
+                        </button>
                 </form>
                 <div className="text-center mt-4">
                 <Link to='/seller-signup' className="text-center block text-[#111] text-lg">Don&apos;t have an account? Signup</Link>
                 </div>
             </div>
             </div>
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbarSeverity}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

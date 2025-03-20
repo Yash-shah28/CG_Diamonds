@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/client/Navbar.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from '../context/userContext.jsx'
 

@@ -89,3 +89,11 @@ export default function Navbar() {
         </header>
     );
 }
+
+
+
+
+
+// <span
+//                 class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-primary text-white text-xs rounded-full"
+//                 >3</span

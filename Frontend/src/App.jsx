@@ -6,6 +6,9 @@ import UserLogin from './pages/UserLogin';
 import UserSignup from './pages/UserSignup';
 import SellerLogin from './pages/SellerLogin';
 import SellerSignup from './pages/SellerSignup';
+import SellerDashboard from './pages/SellerDashboard';
+import DashboardLayoutSidebarCollapsed from './pages/SellerDashboard';
+import UploadStocks from './pages/UploadStocks';
 
 function App() {
 
@@ -17,6 +20,8 @@ function App() {
         <Route path="/signup" element={<UserSignup/>}/>
         <Route path="/seller-login" element={<SellerLogin/>}/>
         <Route path="/seller-signup" element={<SellerSignup/>}/>
+        <Route path="/seller-dashboard" element={<SellerDashboard/>}/>
+        <Route path="/seller-upload" element={<UploadStocks/>}/>
       </Routes>
     </>
   )
