@@ -1,6 +1,7 @@
 import Diamond from '../models/diamond.models.js'
 import csv from 'csvtojson'
 import fs from 'fs'
+import jwt from 'jsonwebtoken'
 
 export const uploaddiamond = async(req, res) => {
     try {
@@ -10,6 +11,17 @@ export const uploaddiamond = async(req, res) => {
                 message: 'No file uploaded' 
             });
         }
+
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ 
+                success: false,
+                message: 'Authentication required' 
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const sellerId = decoded.userId;
 
         const jsonArray = await csv().fromFile(req.file.path);
         
@@ -51,8 +63,12 @@ export const uploaddiamond = async(req, res) => {
             Pavilion_Depth: row.Pavilion_Depth,
             Pavilion_Angle: row.Pavilion_Angle,
             Laser_Inscription: row.Laser_Inscription,
+            owner: sellerId
         }));
 
+        // console.log(req.user._id)
+
+        // userData.owner = req.user._id;
         await Diamond.insertMany(userData);
 
         // Clean up - delete the uploaded file
@@ -85,6 +101,7 @@ export const showDiamonds = async (req, res) => {
 
         const total = await Diamond.countDocuments();
         const diamonds = await Diamond.find()
+            .populate("owner")
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 });

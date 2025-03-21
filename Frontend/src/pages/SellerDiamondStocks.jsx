@@ -6,10 +6,12 @@ import { Box, Pagination, CircularProgress, Typography, ToggleButton, ToggleButt
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import Layout from '../components/admin/SellerLayout';
+import { SellerContext } from '../context/SellerContext';
 
 export default function SellerDiamondStocks() {
     const [viewType, setViewType] = useState('grid');
-    const { diamonds, loading, totalPages, currentPage, fetchDiamonds, setCurrentPage } = useContext(DiamondContext);
+    const { diamonds, loading, totalPages, currentPage, fetchDiamonds, setCurrentPage,  } = useContext(DiamondContext);
+    const { seller } = useContext(SellerContext)
 
     useEffect(() => {
         fetchDiamonds(currentPage);
@@ -30,31 +32,74 @@ export default function SellerDiamondStocks() {
             key={diamond._id}
             className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
         >
-            <div className="relative w-full aspect-w-4 aspect-h-3">
+            {/* Image Container */}
+            <div className="relative pt-[100%]">
                 <img 
                     src={diamond.image || "https://public.readdy.ai/ai/img_res/4fbdfe186912bdc9de8630c939be7484.jpg"} 
                     alt={`${diamond.Shape} Diamond`} 
-                    className="w-full h-full object-cover"
+                    className="absolute top-0 left-0 w-full h-full object-cover"
                 />
+                {/* Price Tag Overlay */}
+                
             </div>
-            <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                    <div>
+
+            {/* Content Section */}
+            <div className="p-4">
+
+                <div className='flex justify-between '>
+                    <div className="mb-3">
                         <h3 className="text-lg font-semibold text-gray-900">
                             {diamond.Shape} Diamond
                         </h3>
                         <p className="text-sm text-gray-600">
-                            {diamond.Weight} Carat | {diamond.Clarity} | {diamond.Color} Color
+                            {diamond.Weight} Carat | {diamond.Clarity} | {diamond.Color}
                         </p>
                     </div>
-                    <span className="text-lg font-bold text-primary">
-                        ${Number(diamond.Price).toLocaleString()}
-                    </span>
+                    <div className="bg-white px-3 py-1 ">
+                        <span className="text-[#1A237E] font-bold">
+                            ${Number(diamond.Price).toLocaleString()}
+                        </span>
+                    </div>
                 </div>
+
+
+                {/* Specifications Grid */}
+                <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+                    <div>
+                        <span className="text-gray-500">Cut Grade:</span>
+                        <span className="ml-2 font-medium">{diamond.Cut_Grade}</span>
+                    </div>
+                    <div>
+                        <span className="text-gray-500">Polish:</span>
+                        <span className="ml-2 font-medium">{diamond.Polish}</span>
+                    </div>
+                    <div>
+                        <span className="text-gray-500">Symmetry:</span>
+                        <span className="ml-2 font-medium">{diamond.Symmetry}</span>
+                    </div>
+                    <div>
+                        <span className="text-gray-500">Lab:</span>
+                        <span className="ml-2 font-medium">{diamond.Lab}</span>
+                    </div>
+                </div>
+
+                <div>
+                <div className=' gap-2 mb-4 text-sm'>
+                        <span className="text-gray-500">Owned by:</span>
+                        <span className="ml-2 font-medium">{diamond.owner.fullname.firstname}{diamond.owner.fullname.lastname}</span>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
                 <div className="space-y-2">
-                    <button className="bg-[#1A237E] text-white w-full py-2 rounded hover:bg-[#1A237E]/90">
+                    <button className="bg-[#1A237E] text-white w-full py-2 rounded-lg hover:bg-[#1A237E]/90 transition-colors">
                         View Details
                     </button>
+                    {seller.email === diamond.owner.email && (
+                <button className="border border-[#1A237E] text-[#1A237E] w-full py-2 rounded-lg hover:bg-[#1A237E]/10 transition-colors">
+                    Edit Stock
+                </button>
+            )}
                 </div>
             </div>
         </div>
@@ -63,67 +108,30 @@ export default function SellerDiamondStocks() {
     const renderDiamondList = (diamond) => (
         <div
             key={diamond._id}
-            className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow p-4"
+            className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow p-4 flex items-center gap-4"
         >
-            <div className="flex flex-col md:flex-row gap-4">
-                {/* Image column */}
-                <div className="w-full md:w-48 h-48 flex-shrink-0">
-                    <img 
-                        src={diamond.image || "https://public.readdy.ai/ai/img_res/4fbdfe186912bdc9de8630c939be7484.jpg"} 
-                        alt={`${diamond.Shape} Diamond`} 
-                        className="w-full h-full object-cover rounded-lg"
-                    />
-                </div>
-
-                {/* Details column */}
-                <div className="flex-grow">
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 className="text-xl font-semibold text-gray-900">
-                                {diamond.Shape} Diamond
-                            </h3>
-                            <p className="text-md text-gray-600 mt-1">
-                                {diamond.Weight} Carat | {diamond.Clarity} | {diamond.Color} Color
-                            </p>
-                        </div>
-                        <span className="text-xl font-bold text-[#1A237E]">
-                            ${Number(diamond.Price).toLocaleString()}
-                        </span>
-                    </div>
-
-                    {/* Specifications Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                            <p className="text-sm text-gray-500">Cut Grade</p>
-                            <p className="font-medium">{diamond.Cut_Grade}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Polish</p>
-                            <p className="font-medium">{diamond.Polish}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Symmetry</p>
-                            <p className="font-medium">{diamond.Symmetry}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Lab</p>
-                            <p className="font-medium">{diamond.Lab}</p>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-3">
-                        <button className="bg-[#1A237E] text-white px-6 py-2 rounded-lg hover:bg-[#1A237E]/90 transition-colors">
-                            View Details
-                        </button>
-                        <button className="border border-[#1A237E] text-[#1A237E] px-6 py-2 rounded-lg hover:bg-[#1A237E]/10 transition-colors">
-                            Edit Stock
-                        </button>
-                        <button className="border border-red-500 text-red-500 px-6 py-2 rounded-lg hover:bg-red-50 transition-colors">
-                            Delete
-                        </button>
-                    </div>
-                </div>
+            <div className="w-24 h-24 flex-shrink-0">
+                <img 
+                    src={diamond.image || "https://public.readdy.ai/ai/img_res/4fbdfe186912bdc9de8630c939be7484.jpg"} 
+                    alt={`${diamond.Shape} Diamond`} 
+                    className="w-full h-full object-cover rounded"
+                />
+            </div>
+            <div className="flex-grow">
+                <h3 className="text-lg font-semibold text-gray-900">
+                    {diamond.Shape} Diamond
+                </h3>
+                <p className="text-sm text-gray-600">
+                    {diamond.Weight} Carat | {diamond.Clarity} | {diamond.Color} Color
+                </p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+                <span className="text-lg font-bold text-primary">
+                    ${Number(diamond.Price).toLocaleString()}
+                </span>
+                <button className="bg-[#1A237E] text-white px-4 py-1 rounded hover:bg-[#1A237E]/90">
+                    View Details
+                </button>
             </div>
         </div>
     );

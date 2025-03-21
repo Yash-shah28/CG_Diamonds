@@ -64,21 +64,26 @@ const DiamondContextProvider = ({children}) => {
             }
 
             const response = await axios.get(
-                `${import.meta.env.VITE_BASEURL}/sellers/diamonds`,
+                `${import.meta.env.VITE_BASEURL}/sellers/list`, // Updated endpoint
                 {
                     params: { page, limit },
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache'
+                    }
                 }
             );
 
-            if (response.status === 200) {
+            if (response.data.success) {
                 setDiamonds(response.data.diamonds);
-                setTotalPages(Math.ceil(response.data.total / limit));
+                console.log(response.data.diamonds)
+                setTotalPages(response.data.totalPages);
                 setCurrentPage(page);
-                return response.data;
+            } else {
+                throw new Error('Failed to fetch diamonds');
             }
         } catch (error) {
-            console.log()
+            console.error('Error fetching diamonds:', error);
             throw new Error(error.response?.data?.message || 'Failed to fetch diamonds');
         } finally {
             setLoading(false);

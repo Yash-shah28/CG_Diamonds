@@ -34,6 +34,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
+app.use((req,res,next) =>{
+    res.locals.currentUser = req.user;
+    next();
+})
+
 app.use('/sellers', diamondRoutes);
 app.use('/sellers', sellerRoutes);
 app.use('/users', userRoutes);
