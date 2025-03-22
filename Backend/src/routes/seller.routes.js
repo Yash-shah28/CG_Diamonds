@@ -1,7 +1,7 @@
 import express from 'express'
 import { body } from 'express-validator';
 const router = express.Router();
-import { loginSeller, registerSeller, checkSellerSession, logoutSeller, verifyToken } from "../controllers/seller.controllers.js";
+import { loginSeller, registerSeller, checkSellerSession, logoutSeller, verifyToken,profileSeller } from "../controllers/seller.controllers.js";
 
 
 router.post('/login', [
@@ -28,5 +28,10 @@ router.post('/register',[
 router.post('/logout', checkSellerSession, logoutSeller);
 
 router.get('/verify-token', verifyToken);
+
+router.get('/profile', checkSellerSession, profileSeller.getProfile);
+router.put('/profile', checkSellerSession, profileSeller.updateProfile);
+router.put('/password', checkSellerSession, profileSeller.updatePassword);
+
 
 export default router;

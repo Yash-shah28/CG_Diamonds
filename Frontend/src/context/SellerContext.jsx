@@ -157,6 +157,86 @@ const SellerContextProvider = ({children}) => {
         }
     };
 
+    const updateSellerProfile = async (profileData) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Authentication required');
+
+            const response = await axios.put(
+                `${import.meta.env.VITE_BASEURL}/sellers/profile`,
+                profileData,
+                {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                setSeller(response.data.seller);
+                return response.data;
+            }
+            throw new Error('Failed to update profile');
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Error updating profile');
+        }
+    };
+
+    const updateSellerPassword = async (passwordData) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Authentication required');
+
+            const response = await axios.put(
+                `${import.meta.env.VITE_BASEURL}/sellers/password`,
+                passwordData,
+                {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                return response.data;
+            }
+            throw new Error('Failed to update password');
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Error updating password');
+        }
+    };
+
+    const showSellerProfile = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Authentication required');
+
+            const response = await axios.get(
+                `${import.meta.env.VITE_BASEURL}/sellers/profile`,
+                {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache'
+                    }
+                }
+            );
+            console.log(response.data.seller)
+
+            if (response.data.success) {
+                setSeller(prevSeller => ({
+                    ...prevSeller,
+                    ...response.data.seller,
+                    isAuthenticated: true
+                }));
+                return response.data.seller;
+            }
+            throw new Error('Failed to fetch profile');
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            throw new Error(error.response?.data?.message || 'Error fetching profile');
+        }
+    };
+
     return (
         <SellerContext.Provider value={{
             seller,
@@ -164,7 +244,10 @@ const SellerContextProvider = ({children}) => {
             login,
             logout,
             signup,
-            loading
+            loading,
+            updateSellerProfile,
+            updateSellerPassword,
+            showSellerProfile // Add the new function to the context
         }}>
             {children}
         </SellerContext.Provider>

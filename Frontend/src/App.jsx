@@ -11,6 +11,7 @@ import UploadStocks from './pages/UploadStocks';
 import ProtectedRoute from './components/ProtectedRoute';
 import SellerDiamondStocks from './pages/SellerDiamondStocks';
 import DiamondDetails from './pages/DiamondDetails';
+import SellerSettings from './pages/SellerSettings';
 
 function App() {
 
@@ -41,7 +42,13 @@ function App() {
         <ProtectedRoute>
           <DiamondDetails />
         </ProtectedRoute>
-      } />
+        } />
+        <Route path="/seller-settings" element={
+                <ProtectedRoute>
+                    <SellerSettings />
+                </ProtectedRoute>
+        } />
+
       </Routes>
     </>
   )

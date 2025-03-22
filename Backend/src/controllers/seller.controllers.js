@@ -130,3 +130,107 @@ export const verifyToken = async (req, res) => {
         return res.status(401).json({ message: 'Invalid token' });
     }
 };
+
+export const profileSeller = {
+    // Get seller profile
+    getProfile: async (req, res) => {
+        try {
+            
+            console.log(res.locals.currentUser)
+            const seller = await sellerModel.findById(req.seller.id);
+            if (!seller) {
+                return res.status(404).json({ success: false, message: 'Seller not found' });
+            }
+
+            res.status(200).json({
+                success: true,
+                seller: {
+                    fullname: seller.fullname,
+                    email: seller.email,
+                    pnumber: seller.pnumber,
+                    company: seller.company,
+                    address: seller.address,
+                    status: seller.status
+                }
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
+    // Update seller profile
+    updateProfile: async (req, res) => {
+        try {
+            const { fullname, pnumber, company, address } = req.body;
+            
+            const seller = await sellerModel.findById(req.seller.userId);
+            if (!seller) {
+                return res.status(404).json({ success: false, message: 'Seller not found' });
+            }
+
+            // Update fields if provided
+            if (fullname) seller.fullname = fullname;
+            if (pnumber) seller.pnumber = pnumber;
+            if (company) seller.company = company;
+            if (address) seller.address = address;
+
+            await seller.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Profile updated successfully',
+                seller: {
+                    fullname: seller.fullname,
+                    email: seller.email,
+                    pnumber: seller.pnumber,
+                    company: seller.company,
+                    address: seller.address,
+                    status: seller.status
+                }
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
+    // Update seller password
+    updatePassword: async (req, res) => {
+        try {
+            const { currentPassword, newPassword } = req.body;
+
+            // Validate input
+            if (!currentPassword || !newPassword) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Current password and new password are required'
+                });
+            }
+
+            const seller = await sellerModel.findById(req.seller.userId).select('+password');
+            if (!seller) {
+                return res.status(404).json({ success: false, message: 'Seller not found' });
+            }
+
+            // Verify current password
+            const isMatch = await bcrypt.compare(currentPassword, seller.password);
+            if (!isMatch) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Current password is incorrect'
+                });
+            }
+
+            // Hash new password
+            const hashPassword = await sellerModel.hashPassword(newPassword);
+            seller.password = hashPassword;
+            await seller.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Password updated successfully'
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+};
