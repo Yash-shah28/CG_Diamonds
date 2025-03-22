@@ -3,7 +3,7 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 const router = express.Router();
-import {uploaddiamond, showDiamonds} from '../controllers/Diamond.controllers.js';
+import {uploaddiamond, showDiamonds, filterDiamonds, getDiamondById} from '../controllers/Diamond.controllers.js';
 import jwt from 'jsonwebtoken';
 import { checkSellerSession } from '../controllers/seller.controllers.js';
 
@@ -71,5 +71,10 @@ router.post('/upload', authenticateSeller, upload.single('file'), (req, res, nex
 router.get('/diamonds', authenticateSeller, showDiamonds);
 
 router.get('/list', authenticateSeller, showDiamonds);
+
+router.get('/diamonds/filter', authenticateSeller, filterDiamonds);
+
+router.get('/diamonds/:id',authenticateSeller, getDiamondById)
+
 
 export default router;

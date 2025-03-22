@@ -66,7 +66,6 @@ export const uploaddiamond = async(req, res) => {
             owner: sellerId
         }));
 
-        // console.log(req.user._id)
 
         // userData.owner = req.user._id;
         await Diamond.insertMany(userData);
@@ -120,4 +119,96 @@ export const showDiamonds = async (req, res) => {
         });
     }
 }
+
+export const filterDiamonds = async (req, res) => {
+    try {
+        const { shapes, clarity, color, minPrice, maxPrice, sortBy } = req.query;
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Authentication required' 
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const sellerId = decoded.userId;
+
+        // Build filter query
+        let query = { owner: sellerId };
+
+        if (shapes && shapes.length) {
+            query.Shape = { $in: shapes };
+        }
+        if (clarity && clarity.length) {
+            query.Clarity = { $in: clarity };
+        }
+        if (color && color.length) {
+            query.Color = { $in: color };
+        }
+        // if (minPrice || maxPrice) {
+        //     query.Price = {
+        //         ...(minPrice && { $gte: Number(minPrice) }),
+        //         ...(maxPrice && { $lte: Number(maxPrice) })
+        //     };
+        // }
+
+        // Build sort options
+        // let sortOptions = {};
+        // switch (sortBy) {
+        //     case 'priceAsc':
+        //         sortOptions = { Price: 1 };
+        //         break;
+        //     case 'priceDesc':
+        //         sortOptions = { Price: -1 };
+        //         break;
+        //     default:
+        //         sortOptions = { createdAt: -1 };
+        // }
+
+
+        const diamonds = await Diamond.find(query)
+            .populate('owner', 'email fullname');
+
+
+        res.status(200).json({
+            success: true,
+            diamonds,
+            total: diamonds.length,
+            totalPages: Math.ceil(diamonds.length / 20)
+        });
+
+    } catch (error) {
+        console.error('Filter error:', error);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+export const getDiamondById = async (req, res) => {
+    try {
+        const diamond = await Diamond.findById(req.params.id)
+            .populate('owner', 'fullname email');
+
+        if (!diamond) {
+            return res.status(404).json({
+                success: false,
+                message: 'Diamond not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            diamond
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 

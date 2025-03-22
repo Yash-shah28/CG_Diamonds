@@ -10,6 +10,7 @@ import SellerDashboard from './pages/SellerDashboard';
 import UploadStocks from './pages/UploadStocks';
 import ProtectedRoute from './components/ProtectedRoute';
 import SellerDiamondStocks from './pages/SellerDiamondStocks';
+import DiamondDetails from './pages/DiamondDetails';
 
 function App() {
 
@@ -22,14 +23,25 @@ function App() {
         <Route path="/seller-login" element={<SellerLogin/>}/>
         <Route path="/seller-signup" element={<SellerSignup/>}/>
         <Route path="/seller-dashboard" element={ 
+          <ProtectedRoute>
             <SellerDashboard/> 
+          </ProtectedRoute>
         }/>
         <Route path="/seller-upload" element={
+          <ProtectedRoute>
             <UploadStocks/>  
+          </ProtectedRoute>
         }/>
         <Route path="/seller-stocks" element={
-            <SellerDiamondStocks/>  
+          <ProtectedRoute>
+            <SellerDiamondStocks/>
+          </ProtectedRoute>  
         }/>
+        <Route path="/diamond/:id" element={
+        <ProtectedRoute>
+          <DiamondDetails />
+        </ProtectedRoute>
+      } />
       </Routes>
     </>
   )

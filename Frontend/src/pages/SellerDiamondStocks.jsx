@@ -2,29 +2,85 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useContext, useState } from 'react';
 import { DiamondContext } from '../context/DiamondContext';
-import { Box, Pagination, CircularProgress, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, Pagination, CircularProgress, Typography, IconButton, TextField, InputAdornment, Button } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import Layout from '../components/admin/SellerLayout';
 import { SellerContext } from '../context/SellerContext';
+import FilterModal from '../components/admin/FilterModal';
+import { Link } from 'react-router-dom';
 
 export default function SellerDiamondStocks() {
     const [viewType, setViewType] = useState('grid');
-    const { diamonds, loading, totalPages, currentPage, fetchDiamonds, setCurrentPage,  } = useContext(DiamondContext);
-    const { seller } = useContext(SellerContext)
+    const [filters, setFilters] = useState({
+        search: '',
+        shapes: [],
+        clarity: [],
+        color: [],
+        priceRange: [0, 100000],
+        sortBy: 'latest'
+    });
+    const [filterModalOpen, setFilterModalOpen] = useState(false);
+    const { diamonds, loading, totalPages, currentPage, fetchDiamonds, setCurrentPage } = useContext(DiamondContext);
+    const { seller } = useContext(SellerContext);
 
     useEffect(() => {
-        fetchDiamonds(currentPage);
-    }, [currentPage]);
+        const loadDiamonds = async () => {
+            try {
+                if (!filterModalOpen) { // Only fetch if modal is closed
+                    await fetchDiamonds(currentPage);
+                }
+            } catch (error) {
+                console.error('Error loading diamonds:', error);
+            }
+        };
+        loadDiamonds();
+    }, [currentPage, filterModalOpen]);
+
+    // Update the filtered diamonds logic
+    const filteredDiamonds = diamonds?.filter(diamond => {
+        // If no filters are active, return all diamonds
+        const hasActiveFilters = filters.search || 
+                               filters.shapes.length > 0 || 
+                               filters.clarity.length > 0 || 
+                               filters.color.length > 0 || 
+                               filters.priceRange[0] > 0 || 
+                               filters.priceRange[1] < 100000;
+
+        if (!hasActiveFilters) {
+            return true;
+        }
+
+
+        // Apply filters only if they are set
+        const matchesSearch = !filters.search || 
+            (diamond.stock?.toLowerCase().includes(filters.search.toLowerCase()) || 
+             diamond.Report?.toLowerCase().includes(filters.search.toLowerCase()));
+
+        const matchesShape = filters.shapes.length === 0 || 
+            filters.shapes.includes(diamond.Shape);
+
+        const matchesClarity = filters.clarity.length === 0 || 
+            filters.clarity.includes(diamond.Clarity);
+
+        const matchesColor = filters.color.length === 0 || 
+            filters.color.includes(diamond.Color);
+
+        const matchesPrice = !filters.priceRange || 
+            (diamond.Price >= filters.priceRange[0] && diamond.Price <= filters.priceRange[1]);
+
+        return matchesSearch && matchesShape && matchesClarity && matchesColor && matchesPrice;
+    }) || [];
+
+    console.log(filteredDiamonds)
+    console.log(filteredDiamonds.length)
+
 
     const handlePageChange = (event, value) => {
         setCurrentPage(value);
-    };
-
-    const handleViewChange = (event, newView) => {
-        if (newView !== null) {
-            setViewType(newView);
-        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const renderDiamondCard = (diamond) => (
@@ -92,9 +148,11 @@ export default function SellerDiamondStocks() {
 
                 {/* Action Buttons */}
                 <div className="space-y-2">
-                    <button className="bg-[#1A237E] text-white w-full py-2 rounded-lg hover:bg-[#1A237E]/90 transition-colors">
-                        View Details
-                    </button>
+                <Link to={`/diamond/${diamond._id}`}>
+            <button className="bg-[#1A237E] text-white w-full py-2 rounded-lg hover:bg-[#1A237E]/90 transition-colors">
+                View Details
+            </button>
+        </Link>
                     {seller.email === diamond.owner.email && (
                 <button className="border border-[#1A237E] text-[#1A237E] w-full py-2 rounded-lg hover:bg-[#1A237E]/10 transition-colors">
                     Edit Stock
@@ -146,6 +204,24 @@ export default function SellerDiamondStocks() {
         );
     }
 
+    // Add no data state
+    if (!loading && (!diamonds || diamonds.length === 0)) {
+        return (
+            <Layout>
+                <Box sx={{ p: 3 }}>
+                    <Typography variant="h4" gutterBottom>
+                        Diamond Stocks
+                    </Typography>
+                    <div className="text-center py-12">
+                        <Typography variant="h6" color="textSecondary">
+                            No diamonds found. Start by uploading some diamonds.
+                        </Typography>
+                    </div>
+                </Box>
+            </Layout>
+        );
+    }
+
     return (
         <Layout>
             <Box sx={{ p: 3 }}>
@@ -153,32 +229,77 @@ export default function SellerDiamondStocks() {
                     <Typography variant="h4" gutterBottom>
                         Diamond Stocks
                     </Typography>
-                    <ToggleButtonGroup
-                        value={viewType}
-                        exclusive
-                        onChange={handleViewChange}
-                        aria-label="view type"
-                    >
-                        <ToggleButton value="grid" aria-label="grid view">
-                            <GridViewIcon />
-                        </ToggleButton>
-                        <ToggleButton value="list" aria-label="list view">
-                            <ViewListIcon />
-                        </ToggleButton>
-                    </ToggleButtonGroup>
                 </div>
+
+                {/* Search Bar and Controls */}
+                <div className="flex gap-4 mb-6 items-center">
+                    <TextField
+                        className="flex-1"
+                        placeholder="Search by Certificate No. or Stock No."
+                        variant="outlined"
+                        size="small"
+                        value={filters.search}
+                        onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <Button
+                        variant="outlined"
+                        startIcon={<FilterListIcon />}
+                        onClick={() => setFilterModalOpen(true)}
+                    >
+                        Filters
+                    </Button>
+                    <div className="flex gap-2">
+                        <IconButton 
+                            onClick={() => setViewType('grid')}
+                            color={viewType === 'grid' ? 'primary' : 'default'}
+                        >
+                            <GridViewIcon />
+                        </IconButton>
+                        <IconButton 
+                            onClick={() => setViewType('list')}
+                            color={viewType === 'list' ? 'primary' : 'default'}
+                        >
+                            <ViewListIcon />
+                        </IconButton>
+                    </div>
+                </div>
+
+                {/* Filter Modal */}
+                <FilterModal 
+                    open={filterModalOpen}
+                    onClose={() => setFilterModalOpen(false)}
+                    filters={filters}
+                    setFilters={setFilters}
+                />
+
                 <section className="py-6">
                     <div className="max-w-7xl mx-auto">
-                        <div className={viewType === 'grid' 
-                            ? "grid grid-cols-1 md:grid-cols-3 gap-8"
-                            : "flex flex-col gap-4"
-                        }>
-                            {diamonds.map((diamond) => (
-                                viewType === 'grid' 
-                                    ? renderDiamondCard(diamond)
-                                    : renderDiamondList(diamond)
-                            ))}
-                        </div>
+                        {filteredDiamonds.length > 0 ? (
+                            <div className={viewType === 'grid' 
+                                ? "grid grid-cols-1 md:grid-cols-3 gap-8"
+                                : "flex flex-col gap-4"
+                            }>
+                                {filteredDiamonds.map((diamond) => (
+                                    <div key={diamond._id}>
+                                        {viewType === 'grid' 
+                                            ? renderDiamondCard(diamond)
+                                            : renderDiamondList(diamond)
+                                        }
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <Typography variant="h6" align="center" color="textSecondary">
+                                No diamonds match your filter criteria
+                            </Typography>
+                        )}
                         
                         {totalPages > 1 && (
                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>

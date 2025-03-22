@@ -76,7 +76,6 @@ const DiamondContextProvider = ({children}) => {
 
             if (response.data.success) {
                 setDiamonds(response.data.diamonds);
-                console.log(response.data.diamonds)
                 setTotalPages(response.data.totalPages);
                 setCurrentPage(page);
             } else {
@@ -90,6 +89,79 @@ const DiamondContextProvider = ({children}) => {
         }
     };
 
+    const applyFilters = async (filters) => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Authentication required');
+            }
+
+            const response = await axios.get(
+                `${import.meta.env.VITE_BASEURL}/sellers/diamonds/filter`,
+                {
+                    params: {
+                        shapes: filters.shapes,
+                        clarity: filters.clarity,
+                        color: filters.color,
+                        minPrice: filters.priceRange[0],
+                        maxPrice: filters.priceRange[1],
+                        sortBy: filters.sortBy
+                    },
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache'
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                setDiamonds(response.data.diamonds);
+                setTotalPages(response.data.totalPages);
+                return {
+                    success: true,
+                    message: 'Filters applied successfully'
+                };
+            }
+            throw new Error('Failed to apply filters');
+        } catch (error) {
+            console.error('Error applying filters:', error);
+            throw new Error(error.response?.data?.message || 'Failed to apply filters');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchDiamondById = async (id) => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Authentication required');
+            }
+
+            const response = await axios.get(
+                `${import.meta.env.VITE_BASEURL}/sellers/diamonds/${id}`,
+                {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache'
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                return response.data.diamond;
+            }
+            throw new Error('Failed to fetch diamond details');
+        } catch (error) {
+            console.error('Error fetching diamond:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <DiamondContext.Provider value={{
             uploadDiamonds,
@@ -98,7 +170,9 @@ const DiamondContextProvider = ({children}) => {
             totalPages,
             currentPage,
             fetchDiamonds,
-            setCurrentPage
+            setCurrentPage,
+            applyFilters, // Add the new function to the context
+            fetchDiamondById
         }}>
             {children}
         </DiamondContext.Provider>
