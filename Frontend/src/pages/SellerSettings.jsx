@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext, useEffect } from 'react';
 import { 
@@ -8,8 +7,6 @@ import {
     TextField, 
     Button, 
     Paper, 
-    Avatar,
-    Divider,
     Alert,
     IconButton,
     InputAdornment
@@ -22,15 +19,15 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 export default function SellerSettings() {
-    const { seller, showSellerProfile, updateSellerProfile, updateSellerPassword } = useContext(SellerContext);
-    const [loading, setLoading] = useState(true);
+    const { seller, updateSellerProfile, updateSellerPassword } = useContext(SellerContext);
     const [editing, setEditing] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [formData, setFormData] = useState({
-        fullname: seller?.fullname || '',
+        firstname: seller?.fullname?.firstname || '',
+        lastname: seller?.fullname?.lastname || '',
         email: seller?.email || '',
-        phone: seller?.pnumber || '',
+        pnumber: seller?.pnumber || '',
         company: seller?.company || '',
         address: seller?.address || ''
     });
@@ -42,18 +39,17 @@ export default function SellerSettings() {
     });
 
     useEffect(() => {
-        const loadProfile = async () => {
-            try {
-                await showSellerProfile();
-            } catch (error) {
-                console.error('Error loading profile:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadProfile();
-    }, []);
-
+        if (seller) {
+            setFormData({
+                firstname: seller.fullname?.firstname || '',
+                lastname: seller.fullname?.lastname || '',
+                email: seller.email || '',
+                pnumber: seller.pnumber || '',
+                company: seller.company || '',
+                address: seller.address || ''
+            });
+        }
+    }, [seller]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -73,9 +69,21 @@ export default function SellerSettings() {
 
     const handleProfileUpdate = async () => {
         try {
-            await updateSellerProfile(formData);
+            const response = await updateSellerProfile(formData);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
             setEditing(false);
+            
+            // Update local form data with the response
+            if (response.seller) {
+                setFormData({
+                    firstname: response.seller.fullname.firstname,
+                    lastname: response.seller.fullname.lastname,
+                    email: response.seller.email,
+                    pnumber: response.seller.pnumber,
+                    company: response.seller.company,
+                    address: response.seller.address
+                });
+            }
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         }
@@ -135,9 +143,8 @@ export default function SellerSettings() {
                                 <Grid item xs={12}>
                                     <TextField
                                         fullWidth
-                                        label="First Name"
                                         name="firstname"
-                                        value={formData.fullname.firstname}
+                                        value={formData.firstname}
                                         onChange={handleInputChange}
                                         disabled={!editing}
                                     />
@@ -145,9 +152,8 @@ export default function SellerSettings() {
                                 <Grid item xs={12}>
                                     <TextField
                                         fullWidth
-                                        label="Last Name"
                                         name="lastname"
-                                        value={formData.fullname.lastname}
+                                        value={formData.lastname}
                                         onChange={handleInputChange}
                                         disabled={!editing}
                                     />
@@ -165,7 +171,7 @@ export default function SellerSettings() {
                                     <TextField
                                         fullWidth
                                         label="Phone"
-                                        name="phone"
+                                        name="pnumber"
                                         value={formData.pnumber}
                                         onChange={handleInputChange}
                                         disabled={!editing}

@@ -37,6 +37,12 @@ const sellerSchema = new Schema ({
         enum: ['Active', 'Inactive'],
         default: 'Inactive'
     },
+    company: {
+        type: String,
+    },
+    address: {
+        type: String,
+    },
     token: {
         type: String
     }

@@ -190,6 +190,7 @@ export const filterDiamonds = async (req, res) => {
 
 export const getDiamondById = async (req, res) => {
     try {
+
         const diamond = await Diamond.findById(req.params.id)
             .populate('owner', 'fullname email');
 

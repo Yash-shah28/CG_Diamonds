@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect } from "react";
 import Navbar from "../components/client/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from '../context/userContext';
+import { Snackbar, Alert } from '@mui/material';
 
 export default function UserSignup() {
     const [formData, setFormData] = useState({
@@ -13,6 +14,11 @@ export default function UserSignup() {
     });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
 
     const { signup, user } = useContext(UserContext);
     const navigate = useNavigate();
@@ -67,18 +73,38 @@ export default function UserSignup() {
             if (success) {
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    setError("Registration successful.");
-                    navigate('/login');
+                    setSnackbar({
+                        open: true,
+                        message: 'Registration successful! Please login.',
+                        severity: 'success'
+                    });
+                    setTimeout(() => {
+                        navigate('/login');
+                    }, 1500);
                     return;
                 }
-                // If token exists, user is automatically logged in
-                navigate('/');
+                setSnackbar({
+                    open: true,
+                    message: 'Registration successful!',
+                    severity: 'success'
+                });
+                setTimeout(() => {
+                    navigate('/');
+                }, 1500);
             }
         } catch (err) {
-            setError(err.message || "Signup failed. Please try again.");
+            setSnackbar({
+                open: true,
+                message: err.message || "Signup failed. Please try again.",
+                severity: 'error'
+            });
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
     };
 
     return (
@@ -170,6 +196,21 @@ export default function UserSignup() {
                     </div>
                 </div>
             </div>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 }

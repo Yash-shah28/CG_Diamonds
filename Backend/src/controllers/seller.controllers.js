@@ -59,7 +59,6 @@ export const loginSeller = async(req, res, next) => {
             id: user._id,
             email: user.email,
             fullname: user.fullname,
-            status: user.status
         };
             
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
@@ -71,7 +70,9 @@ export const loginSeller = async(req, res, next) => {
             user: {
                 email: user.email,
                 fullname: user.fullname,
-                status: user.status
+                pnumber: user.pnumber,
+                company: user.company,
+                address: user.address,
             }
         });
     } catch (error) {
@@ -123,7 +124,6 @@ export const verifyToken = async (req, res) => {
                 email: seller.email,
                 fullname: seller.fullname,
                 pnumber: seller.pnumber,
-                status: seller.status
             }
         });
     } catch (error) {
@@ -161,15 +161,16 @@ export const profileSeller = {
     // Update seller profile
     updateProfile: async (req, res) => {
         try {
-            const { fullname, pnumber, company, address } = req.body;
+            const { firstname,lastname, pnumber, company, address, email } = req.body;
             
-            const seller = await sellerModel.findById(req.seller.userId);
+            const seller = await sellerModel.findOne({email});
             if (!seller) {
                 return res.status(404).json({ success: false, message: 'Seller not found' });
             }
 
             // Update fields if provided
-            if (fullname) seller.fullname = fullname;
+            if (firstname) seller.fullname.firstname = firstname;
+            if (lastname) seller.fullname.lastname = lastname;
             if (pnumber) seller.pnumber = pnumber;
             if (company) seller.company = company;
             if (address) seller.address = address;
@@ -185,7 +186,6 @@ export const profileSeller = {
                     pnumber: seller.pnumber,
                     company: seller.company,
                     address: seller.address,
-                    status: seller.status
                 }
             });
         } catch (error) {

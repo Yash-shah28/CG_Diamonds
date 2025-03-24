@@ -30,7 +30,7 @@ router.post('/logout', checkSellerSession, logoutSeller);
 router.get('/verify-token', verifyToken);
 
 router.get('/profile', checkSellerSession, profileSeller.getProfile);
-router.put('/profile', checkSellerSession, profileSeller.updateProfile);
+router.put('/profile', profileSeller.updateProfile);
 router.put('/password', checkSellerSession, profileSeller.updatePassword);
 
 

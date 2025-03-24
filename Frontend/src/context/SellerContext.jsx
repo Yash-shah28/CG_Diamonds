@@ -14,11 +14,13 @@ const SellerContextProvider = ({children}) => {
             lastname: ''
         },
         pnumber: '',
+        company: '',
+        address: '',
         isAuthenticated: false
     });
     const [loading, setLoading] = useState(true);
     const [retryCount, setRetryCount] = useState(0);
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 100;
 
     // Check for existing token on mount and verify it
     useEffect(() => {
@@ -152,7 +154,6 @@ const SellerContextProvider = ({children}) => {
             }
             return false;
         } catch (error) {
-            console.log(error.response.data)
             throw new Error(error.response.data.errors|| error.response?.data?.message || 'Signup failed');
         }
     };
@@ -162,9 +163,18 @@ const SellerContextProvider = ({children}) => {
             const token = localStorage.getItem('token');
             if (!token) throw new Error('Authentication required');
 
+            // Format the data to match backend expectations
+            const formattedData = {
+                ...profileData,
+                fullname: {
+                    firstname: profileData.firstname,
+                    lastname: profileData.lastname
+                }
+            };
+
             const response = await axios.put(
                 `${import.meta.env.VITE_BASEURL}/sellers/profile`,
-                profileData,
+                formattedData,
                 {
                     headers: { 
                         'Authorization': `Bearer ${token}`,
@@ -173,7 +183,12 @@ const SellerContextProvider = ({children}) => {
             );
 
             if (response.data.success) {
-                setSeller(response.data.seller);
+                // Update the seller state while preserving authentication
+                setSeller(prev => ({
+                    ...prev,
+                    ...response.data.seller,
+                    isAuthenticated: true
+                }));
                 return response.data;
             }
             throw new Error('Failed to update profile');
@@ -206,36 +221,36 @@ const SellerContextProvider = ({children}) => {
         }
     };
 
-    const showSellerProfile = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('Authentication required');
+   
+    //     try {
+    //         const token = localStorage.getItem('token');
+    //         if (!token) throw new Error('Authentication required');
 
-            const response = await axios.get(
-                `${import.meta.env.VITE_BASEURL}/sellers/profile`,
-                {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Cache-Control': 'no-cache'
-                    }
-                }
-            );
-            console.log(response.data.seller)
+    //         const response = await axios.get(
+    //             `${import.meta.env.VITE_BASEURL}/sellers/profile`,
+    //             {
+    //                 headers: { 
+    //                     'Authorization': `Bearer ${token}`,
+    //                     'Cache-Control': 'no-cache'
+    //                 }
+    //             }
+    //         );
+    //         console.log(response.data.seller)
 
-            if (response.data.success) {
-                setSeller(prevSeller => ({
-                    ...prevSeller,
-                    ...response.data.seller,
-                    isAuthenticated: true
-                }));
-                return response.data.seller;
-            }
-            throw new Error('Failed to fetch profile');
-        } catch (error) {
-            console.error('Error fetching profile:', error);
-            throw new Error(error.response?.data?.message || 'Error fetching profile');
-        }
-    };
+    //         if (response.data.success) {
+    //             setSeller(prevSeller => ({
+    //                 ...prevSeller,
+    //                 ...response.data.seller,
+    //                 isAuthenticated: true
+    //             }));
+    //             return response.data.seller;
+    //         }
+    //         throw new Error('Failed to fetch profile');
+    //     } catch (error) {
+    //         console.error('Error fetching profile:', error);
+    //         throw new Error(error.response?.data?.message || 'Error fetching profile');
+    //     }
+    // };
 
     return (
         <SellerContext.Provider value={{
@@ -247,7 +262,6 @@ const SellerContextProvider = ({children}) => {
             loading,
             updateSellerProfile,
             updateSellerPassword,
-            showSellerProfile // Add the new function to the context
         }}>
             {children}
         </SellerContext.Provider>

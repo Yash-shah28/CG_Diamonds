@@ -3,15 +3,25 @@ import React, { useState, useContext } from "react";
 import Navbar from "../components/client/Navbar.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from '../context/userContext.jsx'
+import { Snackbar, Alert } from '@mui/material';
 
 export default function UserLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
 
     const { login } = useContext(UserContext);
     const navigate = useNavigate();
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,10 +31,21 @@ export default function UserLogin() {
         try {
             const success = await login({ email, password });
             if (success) {
-                navigate('/');
+                setSnackbar({
+                    open: true,
+                    message: 'Login successful!',
+                    severity: 'success'
+                });
+                setTimeout(() => {
+                    navigate('/');
+                }, 1500);
             }
         } catch (err) {
-            setError(err.message);
+            setSnackbar({
+                open: true,
+                message: err.message || "Login failed. Please try again.",
+                severity: 'error'
+            });
         } finally {
             setLoading(false);
             setEmail("");
@@ -81,6 +102,21 @@ export default function UserLogin() {
                     </div>
                 </div>
             </div>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 }
