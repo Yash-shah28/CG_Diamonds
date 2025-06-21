@@ -1,271 +1,113 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react-refresh/only-export-components */
-/* eslint-disable react/prop-types */
-import React, { createContext, useState, useEffect } from "react";
-import axios from 'axios';
+/* eslint-disable react-hooks/rules-of-hooks */
+import { createContext, useState } from "react";
+import axios from "axios";
 
-export const SellerContext = createContext();
+export const SellerContext = createContext()
 
-const SellerContextProvider = ({children}) => {
-    const [seller, setSeller] = useState({
-        email: '',
-        fullname: {
-            firstname: '',
-            lastname: ''
-        },
-        pnumber: '',
-        company: '',
-        address: '',
-        isAuthenticated: false
+const API_URL = "http://localhost:5000/api/seller"
+
+axios.defaults.withCredentials = true;
+
+const  sellerContextProvider = ({ children }) => {
+    const [sellerAuth, setSellerAuth] = useState({
+        seller: null,
+        isAuthenticated: false,
+        error: '',
+        isLoading: false,
+        ischeckingAuth: true,
+        message: ''
     });
-    const [loading, setLoading] = useState(true);
-    const [retryCount, setRetryCount] = useState(0);
-    const MAX_RETRIES = 100;
 
-    // Check for existing token on mount and verify it
-    useEffect(() => {
-        const verifyAuth = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const response = await axios.get(
-                    `${import.meta.env.VITE_BASEURL}/sellers/verify-token`, 
-                    {
-                        headers: { 
-                            Authorization: `Bearer ${token}`,
-                            'Cache-Control': 'no-cache'
-                        }
-                    }
-                );
-
-                if (response.status === 200) {
-                    setSeller({
-                        ...response.data.seller,
-                        isAuthenticated: true
-                    });
-                    setRetryCount(0); // Reset retry count on success
-                }
-            } catch (error) {
-                console.error('Token verification error:', error);
-                
-                if (error.response?.status === 401 && retryCount < MAX_RETRIES) {
-                    // Retry verification
-                    setRetryCount(prev => prev + 1);
-                    return;
-                }
-
-                // Clear authentication if max retries reached or other error
-                localStorage.removeItem('token');
-                setSeller({
-                    email: '',
-                    fullname: { firstname: '', lastname: '' },
-                    pnumber: '',
-                    isAuthenticated: false
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        verifyAuth();
-    }, [retryCount]); // Add retryCount as dependency
-
-    // Add axios interceptor with retry logic
-    useEffect(() => {
-        const interceptor = axios.interceptors.request.use(
-            config => {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                    // Add cache control to prevent caching
-                    config.headers['Cache-Control'] = 'no-cache';
-                }
-                return config;
-            },
-            error => Promise.reject(error)
-        );
-
-        // Add response interceptor to handle token expiration
-        const responseInterceptor = axios.interceptors.response.use(
-            response => response,
-            async (error) => {
-                if (error.response?.status === 401 && retryCount < MAX_RETRIES) {
-                    setRetryCount(prev => prev + 1);
-                    return axios.request(error.config);
-                }
-                return Promise.reject(error);
-            }
-        );
-
-        return () => {
-            axios.interceptors.request.eject(interceptor);
-            axios.interceptors.response.eject(responseInterceptor);
-        };
-    }, [retryCount]);
-
-    const login = async (userData) => {
+    const signup = async(firstname, lastname, email, pnumber, password, company, address) => {
+        setSellerAuth(prev => ({...prev, isLoading: true, error: null}));
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_BASEURL}/sellers/login`,
-                userData
-            );
-            if (response.status === 201) {
-                const { user: userData, token } = response.data;
-                setSeller({ ...userData, isAuthenticated: true });
-                localStorage.setItem('token', token);
-                return true;
-            }
-            return false;
+            const response = await axios.post(`${API_URL}/register`,{firstname, lastname, email, pnumber, password, company, address} );
+            setSellerAuth(prev => ({...prev, seller: response.data.seller, isAuthenticated:true, isLoading:false}))
         } catch (error) {
-            throw new Error(error.response.data.errors||error.response?.data?.message || 'Login failed');
+            setSellerAuth(prev => ({...prev,error: error.response.data.message || "Error Signing up", isLoading: false}))
+            throw error;
         }
-    };
 
-    const logout = async () => {
+    }
+
+    const login = async(email,password) =>{
+        setSellerAuth(prev => ({...prev, isLoading: true, error: null}));
         try {
-            await axios.post(`${import.meta.env.VITE_BASEURL}/sellers/logout`);
+            const response = await axios.post(`${API_URL}/login`,{email,password});
+            setSellerAuth(prev => ({...prev,seller: response.data.seller, isAuthenticated: true, isLoading: false}));
         } catch (error) {
-            console.error('Logout error:', error);
-        } finally {
-            localStorage.removeItem('token');
-            setSeller({
-                email: '',
-                fullname: { firstname: '', lastname: '' },
-                pnumber: '',
-                isAuthenticated: false
-            });
+            setSellerAuth(prev => ({...prev,error: error.response.data.message || "Error Logging up", isLoading: false}))
+            throw error;
         }
-    };
+    }
 
-    const signup = async (userData) => {
+    const logout = async() =>{
+        setSellerAuth(prev =>({...prev, isloading: true,error: null}));
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_BASEURL}/sellers/register`,
-                userData
-            );
-            if (response.status === 201) {
-                const { user: userData } = response.data;
-                setSeller({ ...userData });
-                return true;
-            }
-            return false;
+            await axios.post(`${API_URL}/logout`);
+            setSellerAuth(prev => ({...prev, seller: null, isAuthenticated: false, error: null, isloading: false}))
         } catch (error) {
-            throw new Error(error.response.data.errors|| error.response?.data?.message || 'Signup failed');
+            setSellerAuth(prev => ({...prev,error: "Error Logging out", isLoading: false}))
+            throw error;
         }
-    };
+    }
 
-    const updateSellerProfile = async (profileData) => {
+    const verifyEmail = async(code) => {
+        setSellerAuth(prev => ({...prev, isLoading:true, error: null}))
+
+        try{
+            const response = await axios.post(`${API_URL}/verify-email`,{code});
+            setSellerAuth(prev => ({...prev, seller: response.data.seller, isAuthenticated:true, isLoading:false}))
+            return response.data
+        } catch (error){
+            setSellerAuth(prev => ({...prev, error: error.response.data.message|| "Error verifying Email", isLoading: false}))
+            throw error
+        }
+
+    }
+
+    const checkSellerAuth = async() => {
+        setSellerAuth(prev =>({...prev, ischeckingAuth:true, error:null}))
         try {
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('Authentication required');
-
-            // Format the data to match backend expectations
-            const formattedData = {
-                ...profileData,
-                fullname: {
-                    firstname: profileData.firstname,
-                    lastname: profileData.lastname
-                }
-            };
-
-            const response = await axios.put(
-                `${import.meta.env.VITE_BASEURL}/sellers/profile`,
-                formattedData,
-                {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                    }
-                }
-            );
-
-            if (response.data.success) {
-                // Update the seller state while preserving authentication
-                setSeller(prev => ({
-                    ...prev,
-                    ...response.data.seller,
-                    isAuthenticated: true
-                }));
-                return response.data;
-            }
-            throw new Error('Failed to update profile');
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error updating profile');
+            const response = await axios.get(`${API_URL}/check-auth`);
+            setSellerAuth(prev => ({...prev, seller: response.data.seller, isAuthenticated:true,ischeckingAuth: false}))
+        } catch (error){
+            setSellerAuth(prev => ({...prev, error: null,ischeckingAuth: false, isAuthenticated: false}))
+            throw error
         }
-    };
+    }
 
-    const updateSellerPassword = async (passwordData) => {
+    const forgotPassowrd = async(email) => {
+        setSellerAuth(prev =>({...prev, isLoading:true, error:null, message: null}))
         try {
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('Authentication required');
-
-            const response = await axios.put(
-                `${import.meta.env.VITE_BASEURL}/sellers/password`,
-                passwordData,
-                {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                    }
-                }
-            );
-
-            if (response.data.success) {
-                return response.data;
-            }
-            throw new Error('Failed to update password');
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error updating password');
+            const response = await axios.post(`${API_URL}/forgot-password`, {email});
+            setSellerAuth(prev => ({...prev,message: response.data.message , isLoading: false }))
+        } catch (error){
+            setSellerAuth(prev => ({...prev, error: error.response.data.message || "Error Sending reset password email",isLoading: false, }))
+            throw error
         }
-    };
+    }
 
-   
-    //     try {
-    //         const token = localStorage.getItem('token');
-    //         if (!token) throw new Error('Authentication required');
+    const resetPassword = async(token,password) => {
+        setSellerAuth(prev =>({...prev, isLoading:true, error:null}))   
+        try {
+            const response = await axios.post(`${API_URL}/reset-password/${token}`, {password});
+            setSellerAuth(prev => ({...prev,message: response.data.message , isLoading: false }))
+        } catch (error){
+            setSellerAuth(prev => ({...prev, error: error.response.data.message || "Error reseting Password",isLoading: false, }))
+            throw error
+        }
+    }
 
-    //         const response = await axios.get(
-    //             `${import.meta.env.VITE_BASEURL}/sellers/profile`,
-    //             {
-    //                 headers: { 
-    //                     'Authorization': `Bearer ${token}`,
-    //                     'Cache-Control': 'no-cache'
-    //                 }
-    //             }
-    //         );
-    //         console.log(response.data.seller)
 
-    //         if (response.data.success) {
-    //             setSeller(prevSeller => ({
-    //                 ...prevSeller,
-    //                 ...response.data.seller,
-    //                 isAuthenticated: true
-    //             }));
-    //             return response.data.seller;
-    //         }
-    //         throw new Error('Failed to fetch profile');
-    //     } catch (error) {
-    //         console.error('Error fetching profile:', error);
-    //         throw new Error(error.response?.data?.message || 'Error fetching profile');
-    //     }
-    // };
+    
 
-    return (
-        <SellerContext.Provider value={{
-            seller,
-            setSeller,
-            login,
-            logout,
-            signup,
-            loading,
-            updateSellerProfile,
-            updateSellerPassword,
-        }}>
+
+  return (
+        <SellerContext.Provider value={{ sellerAuth, setSellerAuth, signup, login, logout, verifyEmail, forgotPassowrd, resetPassword, checkSellerAuth}}>
             {children}
         </SellerContext.Provider>
-    );
-};
+    )
+}
 
-export default SellerContextProvider
+export default sellerContextProvider;

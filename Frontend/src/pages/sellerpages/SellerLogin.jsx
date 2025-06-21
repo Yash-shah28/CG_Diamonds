@@ -1,0 +1,91 @@
+import { useContext, useState } from 'react'
+import Navbar from '../../components/Navbar'
+import Input from '../../components/Input'
+import { Link, useNavigate } from 'react-router-dom'
+import { Loader, Lock, Mail } from 'lucide-react';
+import { SellerContext } from '../../context/SellerContext';
+
+function SellerLogin() {
+
+  let [email, setEmail] = useState('');
+  let [password, setPassword] = useState('');
+  const navigate = useNavigate();
+  const {sellerAuth, login} = useContext(SellerContext);
+
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    try{
+      await login(email,password);
+      navigate('/seller/dashboard');
+    } catch(error){
+      console.log(error);
+    }
+
+  }
+
+  return (
+    <div>
+      <div className="bg-white min-h-screen">
+        <div>
+          <Navbar />
+        </div>
+        <div className=" pt-25 flex items-center justify-center min-h-screen bg-gray-100">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+            <h2 className="text-2xl font-semibold text-center mb-4">Seller Login</h2>
+            <p className="text-gray-600 text-center mb-6">
+              Access your seller dashboard
+            </p>
+            <form onSubmit={handleSubmit} noValidate>
+              <Input
+                icon={Mail}
+                type="email"
+                placeholder="Email*"
+                name="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Input
+                icon={Lock}
+                type="password"
+                placeholder="Password*"
+                name="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <div className='flex items-center justify-between mb-4'>
+                <Link
+                  to="/seller/forgot-password"
+                  className="text-center block text-[#111] text-lg hover:underline"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+
+              {sellerAuth.error && <p className='text-red-500 font-semibold mt-2'>{sellerAuth.error}</p>}
+
+              <button
+                type="submit"
+                className="w-full bg-black text-white py-2 rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+              >
+                {sellerAuth.isLoading ? <Loader className='animate-spin mx-auto' size={24}/>: "Login Up"}
+              </button>
+            </form>
+            <div className="text-center mt-4">
+              <Link
+                to="/seller/signup"
+                className="text-center block text-[#111] text-lg hover:underline"
+              >
+                Don't have an account? Signup
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+export default SellerLogin

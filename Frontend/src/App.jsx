@@ -1,55 +1,165 @@
-/* eslint-disable no-unused-vars */
-import React from 'react';
-import {Routes, Route} from 'react-router-dom'
-import Home from "./pages/Home"
-import UserLogin from './pages/UserLogin';
-import UserSignup from './pages/UserSignup';
-import SellerLogin from './pages/SellerLogin';
-import SellerSignup from './pages/SellerSignup';
-import SellerDashboard from './pages/SellerDashboard';
-import UploadStocks from './pages/UploadStocks';
-import ProtectedRoute from './components/ProtectedRoute';
-import SellerDiamondStocks from './pages/SellerDiamondStocks';
-import DiamondDetails from './pages/DiamondDetails';
-import SellerSettings from './pages/SellerSettings';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useContext, useEffect } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+
+import { SellerContext } from './context/SellerContext'
+
+//Components
+import LoadingSpinner from './components/LoadingSpinner'
+
+//User pages
+import Home from './pages/userpages/Home'
+import UserLogin from './pages/userpages/UserLogin'
+import UserSignup from './pages/userpages/UserSignup'
+import UserEmailVerification from './pages/userpages/UserEmailVerification'
+import UserForgotPassword from './pages/userpages/UserForgotPassword'
+import UserResetPassword from './pages/userpages/UserResetPassword'
+
+
+//Seller pages
+import SellerLogin from './pages/sellerpages/SellerLogin'
+import SellerSignup from './pages/sellerpages/SellerSignup'
+import SellerEmailVerification from './pages/sellerpages/SellerEmailVerification'
+import Dashboard from './pages/sellerpages/Dashboard'
+import SellerForgotPassword from './pages/sellerpages/SellerForgotPassword'
+import SellerResetPassword from './pages/sellerpages/SellerResetPassword'
+import { UserContext } from './context/UserContext'
+
+
+
+const SellerProtectedRoute = ({children}) => {
+  const {sellerAuth} = useContext(SellerContext);
+
+  if(!sellerAuth.isAuthenticated ) {
+    return <Navigate to="/seller/login" replace/>
+  }
+
+
+  if(!sellerAuth.seller.isVerified){
+    return <Navigate to="/seller/verify-email" replace />
+  }
+
+  return children
+}
+
+
+
+const RedirectAuthenticatedSeller = ({children}) => {
+  const {sellerAuth} = useContext(SellerContext)
+
+  if(sellerAuth.isAuthenticated && sellerAuth.seller.isVerified){
+    return <Navigate to="/seller/dashboard" replace />
+  }
+  return children
+}
+
+
+const UserProtectedRoute = ({children}) => {
+  const {userAuth} = useContext(UserContext);
+
+  if(!userAuth.isAuthenticated ) {
+    return <Navigate to="/user/login" replace/>
+  }
+
+
+  if(!userAuth.user.isVerified){
+    return <Navigate to="/user/verify-email" replace />
+  }
+
+  return children
+}
+
+
+
+const RedirectAuthenticatedUser = ({children}) => {
+  const {userAuth} = useContext(UserContext)
+
+  if(userAuth.isAuthenticated && userAuth.user.isVerified){
+    return <Navigate to="/" replace />
+  }
+  return children
+}
+
 
 function App() {
+
+  const {checkSellerAuth, sellerAuth} = useContext(SellerContext)
+  const {checkUserAuth, userAuth} = useContext(UserContext)
+
+  useEffect(()=>{
+    checkSellerAuth();
+    checkUserAuth();
+  }, [])
+
+  if(sellerAuth.ischeckingAuth) return <LoadingSpinner/>
+  if(userAuth.ischeckingAuth) return <LoadingSpinner/>
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/login" element={<UserLogin/>}/>
-        <Route path="/signup" element={<UserSignup/>}/>
-        <Route path="/seller-login" element={<SellerLogin/>}/>
-        <Route path="/seller-signup" element={<SellerSignup/>}/>
-        <Route path="/seller-dashboard" element={ 
-          <ProtectedRoute>
-            <SellerDashboard/> 
-          </ProtectedRoute>
-        }/>
-        <Route path="/seller-upload" element={
-          <ProtectedRoute>
-            <UploadStocks/>  
-          </ProtectedRoute>
-        }/>
-        <Route path="/seller-stocks" element={
-          <ProtectedRoute>
-            <SellerDiamondStocks/>
-          </ProtectedRoute>  
-        }/>
-        <Route path="/diamond/:id" element={
-        <ProtectedRoute>
-          <DiamondDetails />
-        </ProtectedRoute>
+        {/* User Route */}
+
+        <Route path="/" element={<Home />} />
+        <Route path='/user/login' element= {
+          <RedirectAuthenticatedUser>
+            <UserLogin/>
+          </RedirectAuthenticatedUser>
+          }/>
+        <Route path='/user/signup' element= {
+          <RedirectAuthenticatedUser>
+            <UserSignup/>
+          </RedirectAuthenticatedUser>
         } />
-        <Route path="/seller-settings" element={
-                <ProtectedRoute>
-                    <SellerSettings />
-                </ProtectedRoute>
+        <Route path='/user/verify-email' element= {<UserEmailVerification/>} />
+        <Route path='/user/forgot-password' element= {
+          <RedirectAuthenticatedUser>
+            <UserForgotPassword/>
+          </RedirectAuthenticatedUser>
+        } />
+        <Route path='/user/reset-password/:token' element= {
+          <RedirectAuthenticatedUser>
+            <UserResetPassword/>
+          </RedirectAuthenticatedUser>
+        } />
+
+
+        {/* Seller Routes */}
+
+        <Route path="/seller/login" element={
+          <RedirectAuthenticatedSeller>
+            <SellerLogin />
+          </RedirectAuthenticatedSeller>
+        } />
+
+        <Route path="/seller/signup" element={
+          <RedirectAuthenticatedSeller>
+            <SellerSignup />
+          </RedirectAuthenticatedSeller>
+        } />
+
+        <Route path="/seller/verify-email" element={<SellerEmailVerification />} />
+        <Route path="/seller/dashboard" element={
+          <SellerProtectedRoute>
+            <Dashboard />
+          </SellerProtectedRoute>
+        } />
+
+        <Route path="/seller/forgot-password" element={
+          <RedirectAuthenticatedSeller>
+            <SellerForgotPassword />
+          </RedirectAuthenticatedSeller>
+        } />
+
+        <Route path="/seller/reset-password/:token" element={
+          <RedirectAuthenticatedSeller>
+            <SellerResetPassword />
+          </RedirectAuthenticatedSeller>
         } />
 
       </Routes>
+      <Toaster/>
+     
     </>
   )
 }
