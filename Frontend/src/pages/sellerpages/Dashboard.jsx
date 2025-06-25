@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useContext } from 'react';
+import Layout from '../../components/SellerLayout';
 
-function Dashboard() {
+
+const Dashboard = () => {
   return (
-    <div>
-      Dashboard
-    </div>
-  )
-}
+    <Layout>
+      
+    </Layout>
+  );
+};
 
-export default Dashboard
+export default Dashboard;

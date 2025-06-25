@@ -4,6 +4,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
 import { SellerContext } from './context/SellerContext'
+import { UserContext } from './context/UserContext'
+
 
 //Components
 import LoadingSpinner from './components/LoadingSpinner'
@@ -24,19 +26,21 @@ import SellerEmailVerification from './pages/sellerpages/SellerEmailVerification
 import Dashboard from './pages/sellerpages/Dashboard'
 import SellerForgotPassword from './pages/sellerpages/SellerForgotPassword'
 import SellerResetPassword from './pages/sellerpages/SellerResetPassword'
-import { UserContext } from './context/UserContext'
+import SellerDiamondStocks from './pages/sellerpages/SellerDiamondStocks'
+import UploadStocks from './pages/sellerpages/UploadStocks'
+import DiamondDetails from './pages/sellerpages/DiamondDetails'
 
 
 
-const SellerProtectedRoute = ({children}) => {
-  const {sellerAuth} = useContext(SellerContext);
+const SellerProtectedRoute = ({ children }) => {
+  const { sellerAuth } = useContext(SellerContext);
 
-  if(!sellerAuth.isAuthenticated ) {
-    return <Navigate to="/seller/login" replace/>
+  if (!sellerAuth.isAuthenticated) {
+    return <Navigate to="/seller/login" replace />
   }
 
 
-  if(!sellerAuth.seller.isVerified){
+  if (!sellerAuth.seller.isVerified) {
     return <Navigate to="/seller/verify-email" replace />
   }
 
@@ -45,25 +49,25 @@ const SellerProtectedRoute = ({children}) => {
 
 
 
-const RedirectAuthenticatedSeller = ({children}) => {
-  const {sellerAuth} = useContext(SellerContext)
+const RedirectAuthenticatedSeller = ({ children }) => {
+  const { sellerAuth } = useContext(SellerContext)
 
-  if(sellerAuth.isAuthenticated && sellerAuth.seller.isVerified){
+  if (sellerAuth.isAuthenticated && sellerAuth.seller.isVerified) {
     return <Navigate to="/seller/dashboard" replace />
   }
   return children
 }
 
 
-const UserProtectedRoute = ({children}) => {
-  const {userAuth} = useContext(UserContext);
+const UserProtectedRoute = ({ children }) => {
+  const { userAuth } = useContext(UserContext);
 
-  if(!userAuth.isAuthenticated ) {
-    return <Navigate to="/user/login" replace/>
+  if (!userAuth.isAuthenticated) {
+    return <Navigate to="/user/login" replace />
   }
 
 
-  if(!userAuth.user.isVerified){
+  if (!userAuth.user.isVerified) {
     return <Navigate to="/user/verify-email" replace />
   }
 
@@ -72,10 +76,10 @@ const UserProtectedRoute = ({children}) => {
 
 
 
-const RedirectAuthenticatedUser = ({children}) => {
-  const {userAuth} = useContext(UserContext)
+const RedirectAuthenticatedUser = ({ children }) => {
+  const { userAuth } = useContext(UserContext)
 
-  if(userAuth.isAuthenticated && userAuth.user.isVerified){
+  if (userAuth.isAuthenticated && userAuth.user.isVerified) {
     return <Navigate to="/" replace />
   }
   return children
@@ -84,16 +88,16 @@ const RedirectAuthenticatedUser = ({children}) => {
 
 function App() {
 
-  const {checkSellerAuth, sellerAuth} = useContext(SellerContext)
-  const {checkUserAuth, userAuth} = useContext(UserContext)
+  const { checkSellerAuth, sellerAuth } = useContext(SellerContext)
+  const { checkUserAuth, userAuth } = useContext(UserContext)
 
-  useEffect(()=>{
+  useEffect(() => {
     checkSellerAuth();
     checkUserAuth();
   }, [])
 
-  if(sellerAuth.ischeckingAuth) return <LoadingSpinner/>
-  if(userAuth.ischeckingAuth) return <LoadingSpinner/>
+  if (sellerAuth.ischeckingAuth) return <LoadingSpinner />
+  if (userAuth.ischeckingAuth) return <LoadingSpinner />
 
   return (
     <>
@@ -101,25 +105,25 @@ function App() {
         {/* User Route */}
 
         <Route path="/" element={<Home />} />
-        <Route path='/user/login' element= {
+        <Route path='/user/login' element={
           <RedirectAuthenticatedUser>
-            <UserLogin/>
-          </RedirectAuthenticatedUser>
-          }/>
-        <Route path='/user/signup' element= {
-          <RedirectAuthenticatedUser>
-            <UserSignup/>
+            <UserLogin />
           </RedirectAuthenticatedUser>
         } />
-        <Route path='/user/verify-email' element= {<UserEmailVerification/>} />
-        <Route path='/user/forgot-password' element= {
+        <Route path='/user/signup' element={
           <RedirectAuthenticatedUser>
-            <UserForgotPassword/>
+            <UserSignup />
           </RedirectAuthenticatedUser>
         } />
-        <Route path='/user/reset-password/:token' element= {
+        <Route path='/user/verify-email' element={<UserEmailVerification />} />
+        <Route path='/user/forgot-password' element={
           <RedirectAuthenticatedUser>
-            <UserResetPassword/>
+            <UserForgotPassword />
+          </RedirectAuthenticatedUser>
+        } />
+        <Route path='/user/reset-password/:token' element={
+          <RedirectAuthenticatedUser>
+            <UserResetPassword />
           </RedirectAuthenticatedUser>
         } />
 
@@ -139,11 +143,6 @@ function App() {
         } />
 
         <Route path="/seller/verify-email" element={<SellerEmailVerification />} />
-        <Route path="/seller/dashboard" element={
-          <SellerProtectedRoute>
-            <Dashboard />
-          </SellerProtectedRoute>
-        } />
 
         <Route path="/seller/forgot-password" element={
           <RedirectAuthenticatedSeller>
@@ -157,9 +156,33 @@ function App() {
           </RedirectAuthenticatedSeller>
         } />
 
+        <Route path="/seller/dashboard" element={
+          <SellerProtectedRoute>
+            <Dashboard />
+          </SellerProtectedRoute>
+        } />
+
+        <Route path="/seller/stocks" element={
+          <SellerProtectedRoute>
+            <SellerDiamondStocks />
+          </SellerProtectedRoute>
+        } />
+
+        <Route path="/seller/stocks/:id" element={
+          <SellerProtectedRoute>
+            <DiamondDetails />
+          </SellerProtectedRoute>
+        } />
+
+        <Route path="/seller/upload" element={
+          <SellerProtectedRoute>
+            <UploadStocks />
+          </SellerProtectedRoute>
+        } />
+
       </Routes>
-      <Toaster/>
-     
+      <Toaster />
+
     </>
   )
 }

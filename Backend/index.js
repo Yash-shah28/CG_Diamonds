@@ -6,6 +6,7 @@ import cors from 'cors';
 import { connectToDb } from './db/connectDb.js';
 import sellerRoutes from './routes/seller.route.js';
 import userRoutes from './routes/user.route.js';
+import diamondRoutes from './routes/diamond.routes.js'
 
 dotenv.config();
 
@@ -23,7 +24,8 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use("/api/seller", sellerRoutes);
-app.use('/api/user', userRoutes)
+app.use('/api/user', userRoutes);
+app.use('/api/diamond',diamondRoutes);
 
 app.listen(PORT, () => {
     connectToDb();
