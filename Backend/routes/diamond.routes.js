@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { getDiamond, uploadStock, getDiamondById } from '../controllers/diamond.controller.js';
 import fs from 'fs'
+import { verifyToken } from '../middleware/verifyToken.js';
 
 const router = express.Router();
 
@@ -37,7 +38,7 @@ const upload = multer({
     }
 });
 
-router.post('/upload', upload.single('file'), uploadStock )
+router.post('/upload', upload.single('file'), verifyToken,uploadStock )
 router.post('/get', getDiamond)
 router.post('/get/:id',getDiamondById)
 

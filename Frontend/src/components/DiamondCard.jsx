@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from 'react-router-dom'
+import { SellerContext } from "../context/SellerContext";
 
 export default function DiamondCard({ diamond }) {
-
+    const { sellerAuth } = useContext(SellerContext);
     const pricePerCarat = diamond.rapNetPrice / diamond.weight
     return (
         <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow w-full max-w-sm mx-auto">
@@ -65,7 +66,7 @@ export default function DiamondCard({ diamond }) {
                     <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold">
                         CG
                     </div>
-                    <div className="text-sm font-semibold text-black">Chintamani Gems_ND</div>
+                    <div className="text-sm font-semibold text-black">{diamond.owner.company}</div>
                     <div className="ml-auto text-xs text-gray-500">Location : {diamond.country}</div>
                 </div>
 
@@ -84,11 +85,13 @@ export default function DiamondCard({ diamond }) {
                         Price/Ct: ${Number(pricePerCarat || 0).toFixed(2)}/ct
                     </div>
                 </div>
+                {sellerAuth.seller.firstname == diamond.owner.firstname ?
+                    <button className="w-full bg-black text-white py-2 rounded-lg mt-2 hover:bg-gray-800 transition">
+                        Change availability
+                    </button>
+                    : null
+                }
 
-                {/* Action Button */}
-                <button className="w-full bg-black text-white py-2 rounded-lg mt-2 hover:bg-gray-800 transition">
-                    Change availability
-                </button>
             </div>
         </div>
     );

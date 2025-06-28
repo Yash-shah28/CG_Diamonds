@@ -74,7 +74,12 @@ const diamondStockSchema = new mongoose.Schema({
   parcelStones: { type: String },
   tracrID: { type: String },
   roughSource: { type: String },
-  mine: { type: String }
+  mine: { type: String },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Seller",
+    required: true
+  }
 }, { timestamps: true });
 
 export const DiamondStock = mongoose.model('DiamondStock', diamondStockSchema);

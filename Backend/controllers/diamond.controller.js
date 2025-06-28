@@ -90,7 +90,8 @@ export const uploadStock = async (req, res) => {
         parcelStones: row['Parcel Stones']?.trim(),
         tracrID: row['Tracr ID']?.trim(),
         roughSource: row['Rough Source']?.trim(),
-        mine: row['Mine']?.trim()
+        mine: row['Mine']?.trim(),
+        owner: req.userId
       };
 
       results.push(cleanedData);
@@ -159,7 +160,8 @@ export const getDiamond = async (req, res) => {
     const diamonds = await DiamondStock.find(query)
       .sort(sortQuery)
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .populate('owner', 'company firstname');
 
     return res.status(200).json({
       page: Number(page),
