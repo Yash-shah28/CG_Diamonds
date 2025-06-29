@@ -39,7 +39,7 @@ const upload = multer({
 });
 
 router.post('/upload', upload.single('file'), verifyToken,uploadStock )
-router.post('/get', getDiamond)
+router.get('/get', getDiamond)
 router.post('/get/:id',getDiamondById)
 
 export default router;

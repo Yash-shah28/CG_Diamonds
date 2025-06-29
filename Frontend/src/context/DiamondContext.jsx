@@ -8,9 +8,9 @@ axios.defaults.withCredentials = true;
 
 export const DiamondContext = createContext();
 
-const DiamondContextProvider = ({children}) => {
+const DiamondContextProvider = ({ children }) => {
 
-    const [product,setProduct] = useState({
+    const [product, setProduct] = useState({
         diamond: null,
         isLoading: false,
         error: '',
@@ -19,37 +19,43 @@ const DiamondContextProvider = ({children}) => {
         totalDiamonds: ''
     })
 
-    const upload = async(file) => {
+    const upload = async (file) => {
         const formData = new FormData();
         formData.append('file', file);
-        setProduct(prev => ({...prev, isLoading: true, error:null}));
+        setProduct(prev => ({ ...prev, isLoading: true, error: null }));
         try {
-            const response = await axios.post(`${API_URL}/upload`,formData);
-            setProduct(prev => ({...prev, isLoading: false, message: response.data.message}))
+            const response = await axios.post(`${API_URL}/upload`, formData);
+            setProduct(prev => ({ ...prev, isLoading: false, message: response.data.message }))
         } catch (error) {
-            setProduct(prev => ({...prev, error: error.response.data.message || "Error Uploading the File", isLoading: false}));
+            setProduct(prev => ({ ...prev, error: error.response.data.message || "Error Uploading the File", isLoading: false }));
             throw error;
         }
     }
 
-    const getDiamonds = async(page,search) => {
-        setProduct(prev => ({...prev, isLoading: true, error: null}))
+    const getDiamonds = async (page, search, sort, filter = {}) => {
+        setProduct(prev => ({ ...prev, isLoading: true, error: null }))
         try {
-            const response = await axios.post(`${API_URL}/get`,{page, search});
-            setProduct(prev => ({...prev, diamond:response.data.diamonds, totalPages: response.data.totalPages, totalDiamonds: response.data.totalDiamonds}));
+            const params = {
+                page,
+                search,
+                sort,
+                ...filter
+            };
+            const response = await axios.get(`${API_URL}/get`, { params });
+            setProduct(prev => ({ ...prev, diamond: response.data.diamonds, totalPages: response.data.totalPages, totalDiamonds: response.data.totalDiamonds }));
         } catch (error) {
-            setProduct(prev => ({...prev, error: error.response.data.message || "Error Fectching Diamonds", isLoading: false}));
+            setProduct(prev => ({ ...prev, error: error.response.data.message || "Error Fectching Diamonds", isLoading: false }));
             throw error;
         }
-    } 
+    }
 
-    const getDiamondById = async(id) => {
-        setProduct(prev => ({...prev, isLoading: true, error: null}))
-        try{
+    const getDiamondById = async (id) => {
+        setProduct(prev => ({ ...prev, isLoading: true, error: null }))
+        try {
             const response = await axios.post(`${API_URL}/get/${id}`);
-            setProduct(prev => ({...prev, diamond: response.data.diamond, isLoading: false}))
-        }catch (error) {
-            setProduct(prev => ({...prev, error: error.response.data.message || "Error Fectching Diamonds", isLoading: false}));
+            setProduct(prev => ({ ...prev, diamond: response.data.diamond, isLoading: false }))
+        } catch (error) {
+            setProduct(prev => ({ ...prev, error: error.response.data.message || "Error Fectching Diamonds", isLoading: false }));
             throw error;
         }
     }
@@ -57,7 +63,7 @@ const DiamondContextProvider = ({children}) => {
 
 
     return (
-        <DiamondContext.Provider value={{product, setProduct, upload, getDiamonds, getDiamondById}} >
+        <DiamondContext.Provider value={{ product, setProduct, upload, getDiamonds, getDiamondById }} >
             {children}
         </DiamondContext.Provider>
     )

@@ -38,12 +38,12 @@ export const uploadStock = async (req, res) => {
         reportNumber: row['Report #']?.trim(),
         rapLabReportID: row['RapLab Report ID']?.trim(),
         treatment: row['Treatment']?.trim(),
-        rapNetPrice: parseNumber(row['RapNet Price']),
-        rapNetDiscountPercent: parseNumber(row['RapNet Discount %']),
+        // rapNetPrice: parseNumber(row['RapNet Price']),
+        // rapNetDiscountPercent: parseNumber(row['RapNet Discount %']),
         cashPrice: parseNumber(row['Cash Price']),
         cashPriceDiscountPercent: parseNumber(row['Cash Price Discount %']),
-        buyNowPricePerCt: parseNumber(row['BuyNow Price / ct']),
-        buyNowRapPercent: parseNumber(row['BuyNow Rap %']),
+        // buyNowPricePerCt: parseNumber(row['BuyNow Price / ct']),
+        // buyNowRapPercent: parseNumber(row['BuyNow Rap %']),
         depthPercent: parseNumber(row['Depth %']),
         tablePercent: parseNumber(row['Table %']),
         girdleThin: row['Girdle Thin']?.trim(),
@@ -113,33 +113,17 @@ export const uploadStock = async (req, res) => {
 };
 
 export const getDiamond = async (req, res) => {
-  const { page = 1, limit = 10, filters = {}, sort = {}, search } = req.body || {};
+  const { page = 1, search, limit = 10, sort, ...filters } = req.query;
   const skip = (page - 1) * limit;
   let query = {};
 
   try {
-    // Build filters
-    if (filters.shape) query.shape = filters.shape;
-    if (filters.minWeight || filters.maxWeight) {
-      query.weight = {};
-      if (filters.minWeight) query.weight.$gte = Number(filters.minWeight);
-      if (filters.maxWeight) query.weight.$lte = Number(filters.maxWeight);
-    }
-    if (filters.color) query.color = filters.color;
-    if (filters.clarity) query.clarity = filters.clarity;
-    if (filters.stockNumber) {
-      query.stockNumber = { $regex: filters.stockNumber, $options: "i" };
-    }
-    if (filters.status && Array.isArray(filters.status) && filters.status.length > 0) {
-      query.availability = { $in: filters.status };
-    }
-    if (filters.certNumber) {
-      query.reportNumber = { $regex: filters.certNumber, $options: "i" };
-    }
-    if (filters.lab && filters.lab.length > 0) {
-      query.lab = { $in: filters.lab };
-    }
 
+    for (let key in filters) {
+      if (filters[key]) {
+        query[key] = filters[key];
+      }
+    }
     // If search is provided, override query with $or
     if (search) {
       query = {
@@ -152,9 +136,11 @@ export const getDiamond = async (req, res) => {
 
     // Build sort
     let sortQuery = {};
-    if (sort.field && sort.order) {
-      sortQuery[sort.field] = sort.order === "asc" ? 1 : -1;
+    if (sort) {
+      const [field, order] = sort.split('-');
+      sortQuery[field] = order === 'asc' ? 1 : -1;
     }
+    console.log(query)
 
     const total = await DiamondStock.countDocuments(query);
     const diamonds = await DiamondStock.find(query)
@@ -177,15 +163,15 @@ export const getDiamond = async (req, res) => {
 };
 
 
-export const getDiamondById = async(req,res) => {
-  const {id} = req.params;
-  try{
+export const getDiamondById = async (req, res) => {
+  const { id } = req.params;
+  try {
     const diamond = await DiamondStock.findById(id);
-    if(!diamond){
-      return res.status(404).json({message: "Diamond Not Found", success: false })
+    if (!diamond) {
+      return res.status(404).json({ message: "Diamond Not Found", success: false })
     }
-    return res.status(200).json({diamond});
-  }catch (error) {
+    return res.status(200).json({ diamond });
+  } catch (error) {
     console.error("getDiamondById error:", error);
     return res.status(500).json({ error: "Server Error" });
   }

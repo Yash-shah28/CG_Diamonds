@@ -4,7 +4,7 @@ import { SellerContext } from "../context/SellerContext";
 
 export default function DiamondCard({ diamond }) {
     const { sellerAuth } = useContext(SellerContext);
-    const pricePerCarat = diamond.rapNetPrice / diamond.weight
+    const pricePerCarat = diamond.cashPrice / diamond.weight
     return (
         <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow w-full max-w-sm mx-auto">
             {/* Image */}
@@ -75,10 +75,10 @@ export default function DiamondCard({ diamond }) {
                     <div className="text-xs text-gray-500">Diamond price</div>
                     <div className="flex justify-between items-center">
                         <span className="text-sm text-purple-700 font-semibold">
-                            -{Math.abs(diamond.rapNetDiscountPercent || 0)}%
+                            -{(diamond.cashPriceDiscountPercent || 0)}%
                         </span>
                         <span className="text-lg font-bold text-black">
-                            ${Number(diamond.rapNetPrice || 0).toLocaleString()}
+                            ${Number(diamond.cashPrice || 0).toLocaleString()}
                         </span>
                     </div>
                     <div className="text-xs text-gray-600">
