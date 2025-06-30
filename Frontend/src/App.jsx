@@ -29,6 +29,7 @@ import SellerResetPassword from './pages/sellerpages/SellerResetPassword'
 import SellerDiamondStocks from './pages/sellerpages/SellerDiamondStocks'
 import UploadStocks from './pages/sellerpages/UploadStocks'
 import DiamondDetails from './pages/sellerpages/DiamondDetails'
+import SellerProfile from './pages/sellerpages/SellerProfile'
 
 
 
@@ -177,6 +178,12 @@ function App() {
         <Route path="/seller/upload" element={
           <SellerProtectedRoute>
             <UploadStocks />
+          </SellerProtectedRoute>
+        } />
+
+        <Route path='/seller/settings' element={
+          <SellerProtectedRoute>
+            <SellerProfile />
           </SellerProtectedRoute>
         } />
 

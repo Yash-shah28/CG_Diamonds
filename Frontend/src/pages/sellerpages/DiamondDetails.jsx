@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { Copy, Download } from "lucide-react";
@@ -15,13 +16,13 @@ export default function DiamondDetails() {
     useEffect(() => {
         const loadDiamond = async () => {
             try {
-                const data = await getDiamondById(id);
+                await getDiamondById(id);
             } catch (error) {
                 console.error('Error loading diamond:', error);
             }
         };
         loadDiamond();
-    }, [id]);
+    }, []);
 
     if (product.isLoading) {
         return (
@@ -44,7 +45,7 @@ export default function DiamondDetails() {
         );
     }
 
-    const rapNetPricePerCarat = product.diamond.rapNetPrice/product.diamond.weight
+    const rapNetPricePerCarat = product.diamond.rapNetPrice / product.diamond.weight
 
     return (
         <Layout>

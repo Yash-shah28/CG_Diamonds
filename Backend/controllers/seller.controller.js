@@ -5,9 +5,9 @@ import { Seller } from '../models/seller.model.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 // import { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail, sendResetSuccessEmail } from '../mailtrap/emails.js';
 
-export const register = async(req, res) => {
+export const register = async (req, res) => {
 
-    const { firstname, lastname, email, password, pnumber, company, address} = req.body;
+    const { firstname, lastname, email, password, pnumber, company, address } = req.body;
     try {
         if (!firstname || !email || !password || !pnumber || !company || !address) {
             throw new Error('All fields are required');
@@ -15,16 +15,16 @@ export const register = async(req, res) => {
 
         const existingSeller = await Seller.findOne({ email });
         if (existingSeller) {
-            return res.status(400).json({success:false, message: 'Seller with this email already exists' });
+            return res.status(400).json({ success: false, message: 'Seller with this email already exists' });
         }
 
         const existingSellerByPhone = await Seller.findOne({ pnumber });
         if (existingSellerByPhone) {
-            return res.status(400).json({success:false, message: 'Seller with this phone number already exists' });
+            return res.status(400).json({ success: false, message: 'Seller with this phone number already exists' });
         }
 
         const hasedPassword = await bcryptjs.hash(password, 10);
-        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString(); 
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
         const seller = new Seller({
             firstname,
@@ -35,7 +35,7 @@ export const register = async(req, res) => {
             company,
             address,
             verificationToken: verificationToken,
-            verificationExpires: Date.now() + 24 * 60 * 60 * 1000 
+            verificationExpires: Date.now() + 24 * 60 * 60 * 1000
         });
 
         await seller.save();
@@ -45,8 +45,8 @@ export const register = async(req, res) => {
         // await sendVerificationEmail(seller.email, verificationToken);
 
         return res.status(201).json({
-            success:true, 
-            message: 'Seller registered successfully', 
+            success: true,
+            message: 'Seller registered successfully',
             seller: {
                 firstname: seller.firstname,
                 lastname: seller.lastname,
@@ -55,24 +55,24 @@ export const register = async(req, res) => {
                 company: seller.company,
                 address: seller.address,
                 isVerified: seller.isVerified
-            } 
+            }
         });
-        
+
     } catch (error) {
-        return res.status(400).json({success:false, message: error.message });
+        return res.status(400).json({ success: false, message: error.message });
     }
 }
 
-export const verifyEmail = async(req, res) => {
-    const {code} = req.body;
+export const verifyEmail = async (req, res) => {
+    const { code } = req.body;
 
-    try{
+    try {
         const seller = await Seller.findOne({
             verificationToken: code,
             verificationExpires: { $gt: Date.now() }
         });
         if (!seller) {
-            return res.status(400).json({success:false, message: 'Invalid or expired verification code' });
+            return res.status(400).json({ success: false, message: 'Invalid or expired verification code' });
         };
 
         seller.isVerified = true;
@@ -82,7 +82,7 @@ export const verifyEmail = async(req, res) => {
 
         // await sendWelcomeEmail(seller.email, seller.firstname);
         return res.status(200).json({
-            success:true, 
+            success: true,
             message: 'Email verified successfully',
             seller: {
                 firstname: seller.firstname,
@@ -92,15 +92,15 @@ export const verifyEmail = async(req, res) => {
                 company: seller.company,
                 address: seller.address,
                 isVerified: seller.isVerified
-            } 
-         });
+            }
+        });
     } catch (error) {
-        return res.status(400).json({success:false, message: error.message });
+        return res.status(400).json({ success: false, message: error.message });
 
     }
 }
 
-export const login = async(req, res) => {
+export const login = async (req, res) => {
     const { email, password } = req.body;
     try {
         if (!email || !password) {
@@ -108,22 +108,22 @@ export const login = async(req, res) => {
         }
 
         const seller = await Seller.findOne({ email });
-        if(!seller) {
-            return res.status(400).json({success:false, message: 'Invalid credentials' });
+        if (!seller) {
+            return res.status(400).json({ success: false, message: 'Invalid credentials' });
         }
         if (!seller.isVerified) {
-            return res.status(400).json({success:false, message: 'Please verify your email before logging in' });
+            return res.status(400).json({ success: false, message: 'Please verify your email before logging in' });
         }
-        const isPasswordValid = await bcryptjs.compare(password,seller.password);
+        const isPasswordValid = await bcryptjs.compare(password, seller.password);
         if (!isPasswordValid) {
-            return res.status(400).json({success:false, message: 'Invalid credentials' });
+            return res.status(400).json({ success: false, message: 'Invalid credentials' });
         }
         generateTokenAndSetCookie(res, seller._id);
         seller.lastLogin = new Date();
         await seller.save();
         return res.status(200).json({
-            success:true, 
-            message: 'Login successful', 
+            success: true,
+            message: 'Login successful',
             seller: {
                 firstname: seller.firstname,
                 lastname: seller.lastname,
@@ -132,21 +132,21 @@ export const login = async(req, res) => {
                 company: seller.company,
                 address: seller.address,
                 isVerified: seller.isVerified
-            } 
+            }
         });
 
     } catch (error) {
-        return res.status(400).json({success:false, message: error.message });
+        return res.status(400).json({ success: false, message: error.message });
     }
 }
 
-export const logout = async(req, res) => {
+export const logout = async (req, res) => {
     res.clearCookie('token');
-    return res.status(200).json({success:true, message: 'Logged out successfully'});
+    return res.status(200).json({ success: true, message: 'Logged out successfully' });
 
 }
 
-export const forgotPassword = async(req, res) => {
+export const forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
         if (!email) {
@@ -155,7 +155,7 @@ export const forgotPassword = async(req, res) => {
 
         const seller = await Seller.findOne({ email });
         if (!seller) {
-            return res.status(400).json({success:false, message: 'Seller with this email does not exist' });
+            return res.status(400).json({ success: false, message: 'Seller with this email does not exist' });
         }
 
         const resetToken = crypto.randomBytes(32).toString('hex');
@@ -167,26 +167,26 @@ export const forgotPassword = async(req, res) => {
 
         // await sendPasswordResetEmail(seller.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
 
-        return res.status(200).json({success:true, message: 'Password reset link sent to your mail' });
+        return res.status(200).json({ success: true, message: 'Password reset link sent to your mail' });
 
 
     } catch (error) {
-        return res.status(400).json({success:false, message: error.message });
+        return res.status(400).json({ success: false, message: error.message });
     }
 
-}   
+}
 
-export const resetPassword = async(req, res) => {
+export const resetPassword = async (req, res) => {
     try {
         const { token } = req.params;
         const { password } = req.body;
-        
+
         const seller = await Seller.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }
         });
         if (!seller) {
-            return res.status(400).json({success:false, message: 'Invalid or expired password reset token' });
+            return res.status(400).json({ success: false, message: 'Invalid or expired password reset token' });
         }
 
         const hasedPassword = await bcryptjs.hash(password, 10);
@@ -196,22 +196,22 @@ export const resetPassword = async(req, res) => {
         await seller.save();
 
         // await sendResetSuccessEmail(seller.email);
-        return res.status(200).json({success:true, message: 'Password reset successful' });
+        return res.status(200).json({ success: true, message: 'Password reset successful' });
     } catch (error) {
-        return res.status(400).json({success:false, message: error.message });
-        
+        return res.status(400).json({ success: false, message: error.message });
+
     }
 }
 
-export const checkSellerAuth = async(req, res) => {
+export const checkSellerAuth = async (req, res) => {
     try {
         const seller = await Seller.findById(req.userId);
-        if(!seller) {
-            return res.status(400).json({success:false, message: 'Seller not found' });
+        if (!seller) {
+            return res.status(400).json({ success: false, message: 'Seller not found' });
         }
         return res.status(200).json({
-            success:true, 
-            message: 'Seller authenticated successfully', 
+            success: true,
+            message: 'Seller authenticated successfully',
             seller: {
                 firstname: seller.firstname,
                 lastname: seller.lastname,
@@ -220,10 +220,65 @@ export const checkSellerAuth = async(req, res) => {
                 company: seller.company,
                 address: seller.address,
                 isVerified: seller.isVerified
-            } 
+            }
         });
     } catch (error) {
-        return res.status(400).json({success:false, message: error.message });
+        return res.status(400).json({ success: false, message: error.message });
+
+    }
+}
+
+export const updateSeller = async (req, res) => {
+    const sellerId = req.userId;
+    const { firstname, lastname, email, pnumber, company, address } = req.body;
+    try {
+        if (!firstname || !email || !pnumber || !company || !address) {
+            throw new Error('All fields are required');
+        }
+
+        const updatedSeller = await Seller.findByIdAndUpdate(sellerId, { firstname, lastname, email, pnumber, company, address })
+        res.status(200).json({
+            success: true,
+            updatedSeller: {
+                firstname: updatedSeller.firstname,
+                lastname: updatedSeller.lastname,
+                email: updatedSeller.email,
+                pnumber: updatedSeller.pnumber,
+                company: updatedSeller.company,
+                address: updatedSeller.address,
+                isVerified: updatedSeller.isVerified
+            }
+        });
+
+
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    }
+
+}
+
+export const updatePassword = async (req, res) => {
+    const sellerId = req.userId;
+    const { password, newpassword } = req.body;
+    try {
+        if (!password || !newpassword) {
+            throw new Error('Email and password are required');
+        }
+
+        const seller = await Seller.findById(sellerId);
+
+        const isPasswordValid = await bcryptjs.compare(password, seller.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ success: false, message: 'Invalid Password' });
+        }
+
+        const hashedPassword = await bcryptjs.  hash(newpassword, 10);
+        seller.password = hashedPassword;
+        await seller.save();
+        return res.status(200).json({ success: true, message: 'Password updated successfully' });
+
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
 
     }
 }

@@ -42,7 +42,7 @@ const DiamondContextProvider = ({ children }) => {
                 ...filter
             };
             const response = await axios.get(`${API_URL}/get`, { params });
-            setProduct(prev => ({ ...prev, diamond: response.data.diamonds, totalPages: response.data.totalPages, totalDiamonds: response.data.totalDiamonds }));
+            setProduct(prev => ({ ...prev, diamond: response.data.diamonds, totalPages: response.data.totalPages, totalDiamonds: response.data.totalDiamonds, isLoading: false}));
         } catch (error) {
             setProduct(prev => ({ ...prev, error: error.response.data.message || "Error Fectching Diamonds", isLoading: false }));
             throw error;

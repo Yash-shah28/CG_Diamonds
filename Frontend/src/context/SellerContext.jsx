@@ -99,12 +99,33 @@ const  sellerContextProvider = ({ children }) => {
         }
     }
 
+    const updateSeller = async(firstname, lastname, email, pnumber, company, address) => {
+        setSellerAuth(prev => ({...prev, isLoading: true, error:null}))
+        try {
+            const response = await axios.put(`${API_URL}/update`,{firstname, lastname, email, pnumber, company, address})
+            setSellerAuth(prev => ({...prev, seller: response.data.updatedSeller, isLoading: false}))
+        } catch (error) {
+            setSellerAuth(prev => ({...prev, error: error.response.data.message || "Error Updating the profile",isLoading: false }))
+            throw error
+        }
+    }
+    const updateSellerPassword = async(password,newpassword) => {
+        setSellerAuth(prev => ({...prev, isLoading: true, error:null}))
+        try {
+            const response = await axios.patch(`${API_URL}/change-password`,{password,newpassword})
+            setSellerAuth(prev => ({...prev, seller: response.data.updatedSeller, isLoading: false}))
+        } catch (error) {
+            setSellerAuth(prev => ({...prev, error: error.response.data.message || "Error Updating the Password",isLoading: false }))
+            throw error
+        }
+    }
+
 
     
 
 
   return (
-        <SellerContext.Provider value={{ sellerAuth, setSellerAuth, signup, login, logout, verifyEmail, forgotPassowrd, resetPassword, checkSellerAuth}}>
+        <SellerContext.Provider value={{ sellerAuth, setSellerAuth, signup, login, logout, verifyEmail, forgotPassowrd, resetPassword, checkSellerAuth, updateSeller, updateSellerPassword}}>
             {children}
         </SellerContext.Provider>
     )
