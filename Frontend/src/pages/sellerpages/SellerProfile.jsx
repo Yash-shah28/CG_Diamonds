@@ -34,7 +34,7 @@ export default function SellerProfile() {
         setLastname(sellerAuth.seller.lastname);
         setPnumber(sellerAuth.seller.pnumber)
         setAddress(sellerAuth.seller.address)
-    });
+    }, []);
 
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
@@ -53,7 +53,6 @@ export default function SellerProfile() {
         }
         try {
             await updateSellerPassword(password, newPassword);
-            navigate('/seller/settings')
         } catch (err) {
             console.log(err);
         }

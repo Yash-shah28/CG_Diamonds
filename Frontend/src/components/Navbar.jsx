@@ -12,7 +12,6 @@ export default function Navbar() {
     const handleLogout = async () => {
         await logout();
     }
-    console.log(userAuth.isAuthenticated)
 
     return (
         <header className="fixed w-full bg-white/95 backdrop-blur-sm z-50 border-b border-gray-100">

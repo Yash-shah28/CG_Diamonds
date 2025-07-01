@@ -113,7 +113,7 @@ const  sellerContextProvider = ({ children }) => {
         setSellerAuth(prev => ({...prev, isLoading: true, error:null}))
         try {
             const response = await axios.patch(`${API_URL}/change-password`,{password,newpassword})
-            setSellerAuth(prev => ({...prev, seller: response.data.updatedSeller, isLoading: false}))
+            setSellerAuth(prev => ({...prev, message: response.data.message , isLoading: false}))
         } catch (error) {
             setSellerAuth(prev => ({...prev, error: error.response.data.message || "Error Updating the Password",isLoading: false }))
             throw error

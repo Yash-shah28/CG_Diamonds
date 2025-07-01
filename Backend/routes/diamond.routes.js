@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { getDiamond, uploadStock, getDiamondById } from '../controllers/diamond.controller.js';
+import { getDiamond, uploadStock, getDiamondById, changeAvailability} from '../controllers/diamond.controller.js';
 import fs from 'fs'
 import { verifyToken } from '../middleware/verifyToken.js';
 
@@ -40,6 +40,7 @@ const upload = multer({
 
 router.post('/upload', upload.single('file'), verifyToken,uploadStock )
 router.get('/get', getDiamond)
+router.patch('/update-availability',changeAvailability)
 router.post('/get/:id',getDiamondById)
 
 export default router;

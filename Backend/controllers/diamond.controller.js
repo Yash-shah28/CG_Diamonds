@@ -162,7 +162,6 @@ export const getDiamond = async (req, res) => {
   }
 };
 
-
 export const getDiamondById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -173,6 +172,22 @@ export const getDiamondById = async (req, res) => {
     return res.status(200).json({ diamond });
   } catch (error) {
     console.error("getDiamondById error:", error);
+    return res.status(500).json({ error: "Server Error" });
+  }
+}
+
+export const changeAvailability = async (req, res) => {
+  const { availability, id } = req.body;
+  try {
+    const diamond = await DiamondStock.findById(id);
+    if (!diamond) {
+      return res.status(404).json({ message: "Diamond Not Found", success: false })
+    }
+    diamond.availability = availability;
+    await diamond.save();
+    return res.status(200).json({ success: true, message: "Diamond Updated successfully", diamond });
+  } catch (error) {
+    console.error("changeAvailability error:", error);
     return res.status(500).json({ error: "Server Error" });
   }
 }

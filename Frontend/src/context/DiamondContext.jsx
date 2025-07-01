@@ -60,10 +60,21 @@ const DiamondContextProvider = ({ children }) => {
         }
     }
 
+    const changeAvailability = async (availability, id) => {
+        setProduct(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const response = await axios.patch(`${API_URL}/update-availability`, {availability, id});
+            setProduct(prev => ({ ...prev, isLoading: false, message: response.data.message }))
+        } catch (error) {
+            setProduct(prev => ({ ...prev, error: error.response.data.message || "Error Uploading the File", isLoading: false }));
+            throw error;
+        }
+    }
+
 
 
     return (
-        <DiamondContext.Provider value={{ product, setProduct, upload, getDiamonds, getDiamondById }} >
+        <DiamondContext.Provider value={{ product, setProduct, upload, getDiamonds, getDiamondById, changeAvailability }} >
             {children}
         </DiamondContext.Provider>
     )
