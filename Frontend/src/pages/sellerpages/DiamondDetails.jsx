@@ -7,6 +7,7 @@ import { Copy, Download } from "lucide-react";
 
 import Layout from '../../components/SellerLayout';
 import { DiamondContext } from '../../context/DiamondContext';
+import { SellerContext } from '../../context/SellerContext';
 
 export default function DiamondDetails() {
     const { id } = useParams();
@@ -45,7 +46,7 @@ export default function DiamondDetails() {
         );
     }
 
-    const rapNetPricePerCarat = product.diamond.rapNetPrice / product.diamond.weight
+    const cashPricePerCarat = product.diamond.cashPrice / product.diamond.weight
 
     return (
         <Layout>
@@ -88,9 +89,7 @@ export default function DiamondDetails() {
                             </button>
                         </div> */}
 
-                        <button className="w-full bg-black text-white mt-4 py-2 rounded hover:bg-opacity-90">
-                            Change availability
-                        </button>
+
                     </div>
 
                     {/* Right Section - Details */}
@@ -102,7 +101,7 @@ export default function DiamondDetails() {
                         </div>
                         <div className="flex gap-2">
                             <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Natural</span>
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Available</span>
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{product.diamond.availability}</span>
                         </div>
 
                         <div className="flex gap-2 justify-between">
@@ -148,10 +147,10 @@ export default function DiamondDetails() {
                         <div className="mt-6">
                             <p className="text-sm text-gray-600">Diamond price</p>
                             <p className="text-3xl font-bold text-black">
-                                ${product.diamond.rapNetPrice?.toFixed(2) || "162.00"}
-                                <span className="text-purple-600 text-sm font-semibold ml-2">({product.diamond.rapNetDiscountPercent}% off)</span>
+                                ${product.diamond.cashPrice?.toFixed(2)}
+                                <span className="text-purple-600 text-sm font-semibold ml-2">(-{product.diamond.cashPriceDiscountPercent}% off)</span>
                             </p>
-                            <p className="text-sm text-gray-600 mt-1">Price/Ct: ${rapNetPricePerCarat?.toFixed(2)}/ct</p>
+                            <p className="text-sm text-gray-600 mt-1">Price/Ct: ${cashPricePerCarat?.toFixed(2)}/ct</p>
                         </div>
                     </div>
                 </div>

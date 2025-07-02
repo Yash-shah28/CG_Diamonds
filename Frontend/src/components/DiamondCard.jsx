@@ -5,7 +5,7 @@ import { DiamondContext } from "../context/DiamondContext";
 
 export default function DiamondCard({ diamond }) {
     const { sellerAuth } = useContext(SellerContext);
-    const { changeAvailability} = useContext(DiamondContext);
+    const { changeAvailability } = useContext(DiamondContext);
     const pricePerCarat = diamond.cashPrice / diamond.weight;
 
     const [showModal, setShowModal] = useState(false);
@@ -15,6 +15,7 @@ export default function DiamondCard({ diamond }) {
         e.preventDefault();
         try {
             await changeAvailability(availability, diamond._id);
+            setShowModal(false);
         } catch (error) {
             console.log(error)
         }
