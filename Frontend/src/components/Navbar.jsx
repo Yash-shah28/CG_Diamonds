@@ -24,7 +24,7 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden lg:flex items-center space-x-8">
-                        <a href="#" className="text-gray-700 hover:text-primary font-medium">Natural Diamonds</a>
+                        <a href="user/diamond" className="text-gray-700 hover:text-primary font-medium">Natural Diamonds</a>
                         <a href="#" className="text-gray-700 hover:text-primary font-medium">Lab Grown Diamonds</a>
                         <a href="#" className="text-gray-700 hover:text-primary font-medium">Contact Us</a>
                         <a href="#" className="text-gray-700 hover:text-primary font-medium">About Us</a>

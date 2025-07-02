@@ -30,6 +30,7 @@ import SellerDiamondStocks from './pages/sellerpages/SellerDiamondStocks'
 import UploadStocks from './pages/sellerpages/UploadStocks'
 import DiamondDetails from './pages/sellerpages/DiamondDetails'
 import SellerProfile from './pages/sellerpages/SellerProfile'
+import UserDiamond from './pages/userpages/UserDiamond'
 
 
 
@@ -127,6 +128,14 @@ function App() {
             <UserResetPassword />
           </RedirectAuthenticatedUser>
         } />
+
+        <Route path='user/diamond' element={
+          <UserProtectedRoute>
+            <UserDiamond />
+          </UserProtectedRoute>
+        } />
+
+
 
 
         {/* Seller Routes */}

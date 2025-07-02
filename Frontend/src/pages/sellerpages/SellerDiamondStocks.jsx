@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useContext, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search';
 
