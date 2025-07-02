@@ -82,4 +82,4 @@ const diamondStockSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export const DiamondStock = mongoose.model('DiamondStock', diamondStockSchema);
+export const DiamondStock = mongoose.model('Diamond', diamondStockSchema);
