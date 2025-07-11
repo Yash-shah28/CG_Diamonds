@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import path from 'path';
 
 import { connectToDb } from './db/connectDb.js';
 import sellerRoutes from './routes/seller.route.js';
@@ -15,6 +16,8 @@ dotenv.config();
 
 const app = express();
 
+const __dirname = path.resolve();
+
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true
@@ -24,11 +27,21 @@ app.use(cookieParser());
 
 const PORT = process.env.PORT || 3000;
 
+
+
 app.use("/api/seller", sellerRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/diamond',diamondRoutes);
 app.use('/api/cart',cartRoutes);
 app.use('/api/whishlist',whishlistRoutes);
+
+
+if(process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
+    });
+}
 
 app.listen(PORT, () => {
     connectToDb();
