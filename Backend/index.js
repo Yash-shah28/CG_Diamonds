@@ -8,6 +8,7 @@ import sellerRoutes from './routes/seller.route.js';
 import userRoutes from './routes/user.route.js';
 import diamondRoutes from './routes/diamond.routes.js';
 import cartRoutes from './routes/cart.route.js';
+import whishlistRoutes from './routes/whishlist.route.js';
 
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use("/api/seller", sellerRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/diamond',diamondRoutes);
 app.use('/api/cart',cartRoutes);
+app.use('/api/whishlist',whishlistRoutes);
 
 app.listen(PORT, () => {
     connectToDb();
