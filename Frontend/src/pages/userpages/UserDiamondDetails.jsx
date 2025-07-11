@@ -3,17 +3,17 @@
 import React, { useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
-import { Copy, Download } from "lucide-react";
 
-import Layout from '../../components/SellerLayout';
+
 import { DiamondContext } from '../../context/DiamondContext';
-import { SellerContext } from '../../context/SellerContext';
+import Navbar from '../../components/Navbar';
 
-export default function DiamondDetails() {
+export default function UserDiamondDetails() {
     const { id } = useParams();
+    // eslint-disable-next-line no-unused-vars
     const navigate = useNavigate();
     const { product, getDiamondById } = useContext(DiamondContext);
-
+    console.log(id)
 
     useEffect(() => {
         const loadDiamond = async () => {
@@ -24,38 +24,21 @@ export default function DiamondDetails() {
             }
         };
         loadDiamond();
-    }, []);
+    }, [id,]);
 
-    if (product.isLoading) {
-        return (
-            <Layout>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-                    <CircularProgress />
-                </Box>
-            </Layout>
-        );
-    }
-
-    if (!product.diamond) {
-        return (
-            <Layout>
-                <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="h5">Diamond not found</Typography>
-                    <Button onClick={() => navigate('/seller/stocks')} sx={{ mt: 2 }}>Go Back</Button>
-                </Box>
-            </Layout>
-        );
-    }
 
     const cashPricePerCarat = product.diamond.cashPrice / product.diamond.weight
 
     return (
-        <Layout>
-            <div className="p-6 md:p-10 bg-white rounded-xl">
+        <>
+            <Navbar />
+            <div className="h-16" />
+
+            <div className="p-6 md:p-10 bg-white rounded-xl ">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Left Section - Video or Image */}
                     <div>
-                        <div className="relative w-full pt-[100%] bg-gray-100 rounded-xl overflow-hidden">
+                        <div className="relative w-full pt-[75%] bg-gray-100 rounded-xl overflow-hidden">
                             {product.diamond.videos?.[0] ? (
                                 <video
                                     src={product.diamond.videos[0]}
@@ -74,23 +57,28 @@ export default function DiamondDetails() {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
-                        {/* <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
-                            <button className="border px-2 py-1 rounded text-sm flex items-center gap-1">
-                                <Copy size={14} /> Copy image link
+                        <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                            {/* Add to Cart */}
+                            <button
+                                className="flex-1 flex items-center justify-center gap-2 border border-gray-300 text-white bg-blue-600 hover:bg-blue-700 transition-all duration-200 px-4 py-2 rounded-md text-sm"
+                                aria-label="Add to Cart"
+                            >
+                                <i className="ri-shopping-cart-2-line"></i>
+                                <span>Add to Cart</span>
                             </button>
-                            <button className="border px-2 py-1 rounded text-sm flex items-center gap-1">
-                                <Download size={14} /> Download image
-                            </button>
-                            <button className="border px-2 py-1 rounded text-sm flex items-center gap-1">
-                                <Copy size={14} /> Copy video link
-                            </button>
-                            <button className="border px-2 py-1 rounded text-sm flex items-center gap-1">
-                                <Download size={14} /> Download video
-                            </button>
-                        </div> */}
 
-                        
+                            {/* Add to Wishlist */}
+                            <button
+                                className="flex-1 flex items-center justify-center gap-2 border border-gray-300 text-blue-600 hover:bg-blue-50 transition-all duration-200 px-4 py-2 rounded-md text-sm"
+                                aria-label="Add to Wishlist"
+                            >
+                                <i className="ri-heart-line"></i>
+                                <span>Add to Wishlist</span>
+                            </button>
+                        </div>
+
+
+
 
                     </div>
 
@@ -156,8 +144,8 @@ export default function DiamondDetails() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </Layout>
+            </div >
+        </>
     );
 }
 

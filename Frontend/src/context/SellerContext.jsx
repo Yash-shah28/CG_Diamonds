@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const SellerContext = createContext()
 
-const API_URL = "http://localhost:5000/api/seller"
+const API_URL = import.meta.env.VITE_Seller_API_URL
 
 axios.defaults.withCredentials = true;
 

@@ -24,7 +24,7 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden lg:flex items-center space-x-8">
-                        <a href="user/diamond" className="text-gray-700 hover:text-primary font-medium">Natural Diamonds</a>
+                        <a href="/user/diamond" className="text-gray-700 hover:text-primary font-medium">Natural Diamonds</a>
                         <a href="#" className="text-gray-700 hover:text-primary font-medium">Lab Grown Diamonds</a>
                         <a href="#" className="text-gray-700 hover:text-primary font-medium">Contact Us</a>
                         <a href="#" className="text-gray-700 hover:text-primary font-medium">About Us</a>
@@ -63,9 +63,11 @@ export default function Navbar() {
                         <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50">
                             <i className="ri-heart-line text-gray-700"></i>
                         </button>
-                        <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50">
-                            <i className="ri-shopping-bag-line text-gray-700"></i>
-                        </button>
+                        <a href="/user/cart">
+                            <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50">
+                                <i className="ri-shopping-bag-line text-gray-700"></i>
+                            </button>
+                        </a>
                     </div>
 
                     {/* Mobile Right Icons - always visible on mobile */}
@@ -100,9 +102,11 @@ export default function Navbar() {
                             <i className="ri-heart-line text-gray-700"></i>
                         </button>
 
-                        <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-50">
-                            <i className="ri-shopping-bag-line text-gray-700"></i>
-                        </button>
+                        <a href="/user/cart">
+                            <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-50">
+                                <i className="ri-shopping-bag-line text-gray-700"></i>
+                            </button>
+                        </a>
 
                         <button
                             className="p-2 rounded-lg hover:bg-gray-50"

@@ -1,8 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import axios from "axios";
 import { createContext, useState } from "react";
 
 
-const API_URL = "http://localhost:5000/api/diamond";
+const API_URL = import.meta.env.VITE_Diamond_API_URL
 
 axios.defaults.withCredentials = true;
 

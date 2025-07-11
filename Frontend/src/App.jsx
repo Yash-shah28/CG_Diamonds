@@ -17,6 +17,9 @@ import UserSignup from './pages/userpages/UserSignup'
 import UserEmailVerification from './pages/userpages/UserEmailVerification'
 import UserForgotPassword from './pages/userpages/UserForgotPassword'
 import UserResetPassword from './pages/userpages/UserResetPassword'
+import UserDiamond from './pages/userpages/UserDiamond'
+import UserDiamondDetails from './pages/userpages/UserDiamondDetails'
+import Cart from './pages/userpages/Cart'
 
 
 //Seller pages
@@ -30,7 +33,7 @@ import SellerDiamondStocks from './pages/sellerpages/SellerDiamondStocks'
 import UploadStocks from './pages/sellerpages/UploadStocks'
 import DiamondDetails from './pages/sellerpages/DiamondDetails'
 import SellerProfile from './pages/sellerpages/SellerProfile'
-import UserDiamond from './pages/userpages/UserDiamond'
+
 
 
 
@@ -129,12 +132,23 @@ function App() {
           </RedirectAuthenticatedUser>
         } />
 
-        <Route path='user/diamond' element={
+        <Route path='/user/diamond' element={
           <UserProtectedRoute>
             <UserDiamond />
           </UserProtectedRoute>
         } />
 
+        <Route path="/user/diamond/:id" element={
+          <UserProtectedRoute>
+            <UserDiamondDetails />
+          </UserProtectedRoute>
+        } />
+
+        <Route path="/user/cart" element={
+          <UserProtectedRoute>
+            <Cart />
+          </UserProtectedRoute>
+        } />
 
 
 

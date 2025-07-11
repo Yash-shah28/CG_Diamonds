@@ -5,8 +5,7 @@ import { createContext, useState } from "react";
 
 export const UserContext = createContext();
 
-const API_URL = "http://localhost:5000/api/user"
-
+const API_URL = import.meta.env.VITE_User_API_URL
 axios.defaults.withCredentials = true
 
 const  userContextProvider = ({ children }) => {

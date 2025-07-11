@@ -26,7 +26,6 @@ export const addToCart = async (req, res) => {
     }
 }
 
-
 export const removeFromCart = async (req, res) => {
     const userId = req.userId;
     const { id } = req.params;
