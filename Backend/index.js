@@ -33,7 +33,7 @@ app.use("/api/seller", sellerRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/diamond',diamondRoutes);
 app.use('/api/cart',cartRoutes);
-app.use('/api/whishlist',whishlistRoutes);
+app.use('/api/wishlist',whishlistRoutes);
 
 
 if(process.env.NODE_ENV === 'production') {

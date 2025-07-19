@@ -22,7 +22,7 @@ const CartContextProvider = ({ children }) => {
         setCart(prev => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await axios.post(`${API_URL}/add`, { diamondId, quantity });
-            setCart(prev => ({ ...prev, items: response.data.cart.items, isLoading: false, message: response.data.message }));
+            setCart(prev => ({ ...prev, items: response.data.items, isLoading: false, message: response.data.message }));
         } catch (error) {
             setCart(prev => ({ ...prev, error: error.response.data.message || "Error Adding to Cart", isLoading: false }));
             throw error;
@@ -44,7 +44,8 @@ const CartContextProvider = ({ children }) => {
         setCart(prev => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await axios.delete(`${API_URL}/remove/${id}`);
-            setCart(prev => ({ ...prev, items: response.data.cart.items, isLoading: false, message: response.data.message }));
+            console.log(response.data.items)
+            setCart(prev => ({ ...prev, items: response.data.items, isLoading: false, message: response.data.message }));
         } catch (error) {
             setCart(prev => ({ ...prev, error: error.response.data.message || "Error Removing from Cart", isLoading: false }));
             throw error;
@@ -55,7 +56,8 @@ const CartContextProvider = ({ children }) => {
         setCart(prev => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await axios.put(`${API_URL}/update/${id}`, { quantity });
-            setCart(prev => ({ ...prev, items: response.data.cart.items, isLoading: false, message: response.data.message }));
+            setCart(prev => ({ ...prev, items: response.data.items, isLoading: false, message: response.data.message }));
+            console.log(response.data.items)
         } catch (error) {
             setCart(prev => ({ ...prev, error: error.response.data.message || "Error Updating Quantity", isLoading: false }));
             throw error;

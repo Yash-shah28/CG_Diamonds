@@ -20,6 +20,7 @@ import UserResetPassword from './pages/userpages/UserResetPassword'
 import UserDiamond from './pages/userpages/UserDiamond'
 import UserDiamondDetails from './pages/userpages/UserDiamondDetails'
 import Cart from './pages/userpages/Cart'
+import WhishlistPage from './pages/userpages/WishlistPage'
 
 
 //Seller pages
@@ -147,6 +148,12 @@ function App() {
         <Route path="/user/cart" element={
           <UserProtectedRoute>
             <Cart />
+          </UserProtectedRoute>
+        } />
+
+        <Route path="/user/whishlist" element={
+          <UserProtectedRoute>
+            <WhishlistPage />
           </UserProtectedRoute>
         } />
 

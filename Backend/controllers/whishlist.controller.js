@@ -41,10 +41,11 @@ export const deletewishlist = async (req, res) => {
 }
 
 export const getwhishlist = async (req, res) => {
+    const userId = req.userId;
     try {
-        const wishlist = await Wishlist.findOne({ user: req.userId }).populate('diamonds');
-        res.json(wishlist || { user: req.user.id, diamonds: [] });
+        const wishlist = await Wishlist.findOne({ user: userId }).populate('diamonds');
+        res.status(200).json({ wishlist: wishlist });
     } catch (err) {
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: err.message });
     }
 }

@@ -9,7 +9,7 @@ export default function CartPage() {
 
     useEffect(() => {
         getCart();
-    }, [removeFromCart,updateQuantity]);
+    }, []);
 
     const calculateTotal = () => {
         return cart.items.reduce((acc, item) => acc + item.diamond.cashPrice * item.quantity, 0);
@@ -62,14 +62,18 @@ export default function CartPage() {
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-2">
                                                     <button
-                                                        onClick={() => updateQuantity(item.diamond._id, Math.max(1, item.quantity - 1))}
+                                                        onClick={async() => {
+                                                            updateQuantity(item.diamond._id, Math.max(1, item.quantity - 1));
+                                                        }}
                                                         className="px-2 py-1 border rounded hover:bg-gray-100"
                                                     >
                                                         <i className="ri-subtract-line text-gray-700 text-sm"></i>
                                                     </button>
                                                     <span className="px-3">{item.quantity}</span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.diamond._id, item.quantity + 1)}
+                                                        onClick={async() => {
+                                                            updateQuantity(item.diamond._id, Math.max(1, item.quantity + 1));
+                                                        }}
                                                         className="px-2 py-1 border rounded hover:bg-gray-100"
                                                     >
                                                         <i className="ri-add-line text-gray-700 text-sm"></i>
@@ -80,7 +84,9 @@ export default function CartPage() {
                                             <td className="py-4 px-4">${(item.diamond.cashPrice * item.quantity).toFixed(2)}</td>
                                             <td className="py-4 px-4 text-center">
                                                 <button
-                                                    onClick={() => removeFromCart(item.diamond._id)}
+                                                    onClick={async() => {
+                                                        removeFromCart(item.diamond._id)
+                                                    }}
                                                     className="text-red-500 hover:text-red-700"
                                                     title="Remove"
                                                 >
