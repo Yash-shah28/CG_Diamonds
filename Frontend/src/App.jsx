@@ -21,7 +21,7 @@ import UserDiamond from './pages/userpages/UserDiamond'
 import UserDiamondDetails from './pages/userpages/UserDiamondDetails'
 import Cart from './pages/userpages/Cart'
 import WhishlistPage from './pages/userpages/WishlistPage'
-
+import OrdersPage from './pages/userpages/Order'
 
 //Seller pages
 import SellerLogin from './pages/sellerpages/SellerLogin'
@@ -154,6 +154,12 @@ function App() {
         <Route path="/user/whishlist" element={
           <UserProtectedRoute>
             <WhishlistPage />
+          </UserProtectedRoute>
+        } />
+
+        <Route path="/user/orders" element={
+          <UserProtectedRoute>
+            <OrdersPage />
           </UserProtectedRoute>
         } />
 

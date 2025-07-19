@@ -64,7 +64,7 @@ export default function DiamondCard({ diamond }) {
           <div>Stock ID: {diamond.stockNumber}</div>
         </div>
 
-        <Link to={`/seller/stocks/${diamond._id}`}>
+        <Link to={`/user/diamond/${diamond._id}`}>
           <div className="font-semibold text-base text-black hover:text-blue-600">
             {diamond.shape} {diamond.weight}ct {diamond.color} {diamond.clarity}{" "}
             {diamond.cutGrade} {diamond.polish} {diamond.symmetry}{" "}

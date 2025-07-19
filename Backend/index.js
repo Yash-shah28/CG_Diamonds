@@ -10,6 +10,7 @@ import userRoutes from './routes/user.route.js';
 import diamondRoutes from './routes/diamond.routes.js';
 import cartRoutes from './routes/cart.route.js';
 import whishlistRoutes from './routes/whishlist.route.js';
+import orderRoutes from './routes/order.route.js';
 
 
 dotenv.config();
@@ -34,6 +35,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/diamond',diamondRoutes);
 app.use('/api/cart',cartRoutes);
 app.use('/api/wishlist',whishlistRoutes);
+app.use('/api/orders',orderRoutes);
 
 
 if(process.env.NODE_ENV === 'production') {

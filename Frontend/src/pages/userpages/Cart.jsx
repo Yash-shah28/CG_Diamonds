@@ -1,15 +1,21 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect } from 'react';
 import { CartContext } from '../../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import axios from 'axios';
 
 export default function CartPage() {
     const { getCart, cart, removeFromCart, updateQuantity } = useContext(CartContext);
 
+    const location = useLocation();
+
+
     useEffect(() => {
-        getCart();
-    }, []);
+        if (location.pathname === '/user/cart') {
+            getCart();
+        }
+    }, [location.pathname]);
 
     const calculateTotal = () => {
         return cart.items.reduce((acc, item) => acc + item.diamond.cashPrice * item.quantity, 0);
@@ -62,7 +68,7 @@ export default function CartPage() {
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-2">
                                                     <button
-                                                        onClick={async() => {
+                                                        onClick={async () => {
                                                             updateQuantity(item.diamond._id, Math.max(1, item.quantity - 1));
                                                         }}
                                                         className="px-2 py-1 border rounded hover:bg-gray-100"
@@ -71,7 +77,7 @@ export default function CartPage() {
                                                     </button>
                                                     <span className="px-3">{item.quantity}</span>
                                                     <button
-                                                        onClick={async() => {
+                                                        onClick={async () => {
                                                             updateQuantity(item.diamond._id, Math.max(1, item.quantity + 1));
                                                         }}
                                                         className="px-2 py-1 border rounded hover:bg-gray-100"
@@ -84,7 +90,7 @@ export default function CartPage() {
                                             <td className="py-4 px-4">${(item.diamond.cashPrice * item.quantity).toFixed(2)}</td>
                                             <td className="py-4 px-4 text-center">
                                                 <button
-                                                    onClick={async() => {
+                                                    onClick={async () => {
                                                         removeFromCart(item.diamond._id)
                                                     }}
                                                     className="text-red-500 hover:text-red-700"
@@ -106,7 +112,17 @@ export default function CartPage() {
                                     <span>${calculateTotal().toFixed(2)}</span>
                                 </div>
                                 <div className="text-right mt-4">
-                                    <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                                    <button onClick={async () => {
+                                        try {
+                                            await axios.post("http://localhost:5000/api/orders/place", {}, { withCredentials: true });
+                                            alert("Order placed successfully!");
+                                            window.location.href = "/user/orders";
+                                        } catch (error) {
+                                            alert("Failed to place order");
+                                            console.error(error);
+                                        }
+                                    }}
+                                        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
                                         Confirm Stone
                                     </button>
                                 </div>
